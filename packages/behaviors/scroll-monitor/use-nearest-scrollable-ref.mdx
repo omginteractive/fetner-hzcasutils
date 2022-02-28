@@ -1,0 +1,63 @@
+---
+name: useNearestScrollNodeRef
+menu: Hooks
+route: /use-nearest-scrolli-node-ref
+---
+
+# useNearestScrollNodeRef
+
+A React [hook] for finding the nearest scrollable ancestor of a DOM node.
+
+> **Note:**
+> This hook is quite low-level in nature. You may want to explore
+> other scroll-related hooks like [useScrolling], [useScrollDirection],
+> [useScrollPosition], [useIntersection], or [useScrollIntersection].
+
+### Wait, what's a 'scrollable node'?
+
+A 'scrollable node' is a DOM node that has a computed [overflow] value
+of `scroll`, or the root ([document]) element.
+
+In other words a 'scrollable node' is a container that
+has scrollbars for its content.
+
+### Ok, but what's this _for_?
+
+Sometimes a component needs to know about details about scroll position,
+direction, or intersection. This hook makes it easy to find the
+scrollable ancestor that is responsible for those details.
+
+## Installation
+
+```shell
+yarn add @hzdg/scroll-monitor
+```
+
+## Usage
+
+```ts
+import {useNearestScrollNodeRef} from '@hzdg/scroll-monitor';
+
+function useNearestScrollNodeRef<T extends Node>(
+  ref: React.RefObject<T>,
+): React.RefObject<HTMLElement | Document | null>;
+```
+
+Takes a [ref object] that referenceas a DOM node, or `null`.
+`useNearestScrollNodeRef` will traverse the DOM to find
+the nearest scrollable parent node.
+
+The returned [ref object] will reference the nearest scrollable node,
+or `null`.
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[overflow]: https://developer.mozilla.org/en-US/docs/Web/CSS/overflow
+[document]: https://developer.mozilla.org/en-US/docs/Web/API/Document
+[usescrolling]: /use-scrolling
+[usescrolldirection]: /use-scroll-direction
+[usescrollposition]: /use-scroll-position
+[useintersection]: /use-intersection
+[usescrollintersection]: /use-scroll-intersection
+[installation]: #installation
+[usage]: #usage

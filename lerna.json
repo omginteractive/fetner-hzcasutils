@@ -1,0 +1,29 @@
+{
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "version": "independent",
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "changelogPreset": "@hzdg/conventional-changelog"
+    },
+    "publish": {
+      "noPrivate": true,
+      "ignoreChanges": ["**/*.md", "**/*.mdx", "**/__tests__/**/*"],
+      "allowBranch": ["master"],
+      "message": "🔖 publish",
+      "registry": "https://npm.pkg.github.com"
+    },
+    "init": {
+      "exact": true
+    }
+  },
+  "packages": [
+    "packages/animations/*",
+    "packages/behaviors/*",
+    "packages/conventional-commits/*",
+    "packages/simple-actions/*",
+    "packages/utilities/*",
+    "packages/ui-components/*"
+  ]
+}

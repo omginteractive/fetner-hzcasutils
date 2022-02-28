@@ -1,0 +1,41 @@
+{
+  "name": "@hzdg/gesture-observable",
+  "description": "An Observable for gestures",
+  "version": "2.1.12",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/gesture-observable"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/dom-utils": "^2.0.3",
+    "@hzdg/moving-average": "^1.1.4",
+    "callbag": "^1.2.0",
+    "callbag-filter": "^1.1.0",
+    "callbag-from-event": "^1.2.1",
+    "callbag-map": "^1.1.0",
+    "callbag-merge": "^3.2.2",
+    "callbag-pipe": "^1.2.0",
+    "callbag-scan": "^1.1.0",
+    "callbag-share": "^1.2.0",
+    "callbag-subject": "^1.0.2",
+    "callbag-subscribe": "^1.5.1",
+    "zen-observable": "^0.8.14"
+  }
+}

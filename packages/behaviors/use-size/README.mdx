@@ -1,0 +1,394 @@
+---
+name: useSize
+menu: Hooks
+route: /use-size
+---
+
+import {Playground} from 'docz';
+import useSize from './src';
+import useRefCallback from '@hzdg/use-ref-callback';
+
+# useSize
+
+A React [hook] for components that care about their size.
+
+## Installation
+
+```shell
+yarn add @hzdg/use-size
+```
+
+## Usage
+
+```js
+import useSize from '@hzdg/use-size';
+```
+
+`useSize` has two different modes of usage: **stateful** and **stateless**.
+(See [stateful] and [stateless] for more on why and when to use which).
+
+Additionally, `useSize` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useSize` has 4 different signatures:
+
+```ts
+// Stateful — returns a size state and a callback ref to attach to a DOM node.
+function useSize(): [Size, (node: HTMLElement | null) => void];
+
+// Stateful with a provided ref object — returns a size state.
+function useSize(providedRef: React.RefObject<HTMLElement>): Size;
+
+// Stateless with a handler - returns a callback ref to attach to a DOM node.
+function useSize(
+  handler: (size: Size) => void,
+): (node: HTMLElement | null) => void;
+
+// Stateless with a handler and a provided ref object - returns nothing!
+function useSize(
+  providedRef: React.RefObject<HTMLElement>,
+  handler: (size: Size) => void,
+): void;
+```
+
+## Stateful
+
+Sometimes a component wants to simply update whenever the size changes.
+In these cases, `useSize` provides a **stateful** API.
+
+### Stateful Example
+
+To `useSize` statefully, call `useSize` without any arguments.
+It will return an array containing a [Size] state and a [callback ref]:
+
+```ts
+function useSize(): [Size, (node: HTMLElement | null) => void];
+```
+
+The returned [callback ref] should be attached to the DOM element to be measured.
+
+<Playground>
+  {() => {
+    const SizeStateUser = () => {
+      const [size, ref] = useSize();
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <pre>{JSON.stringify(size, null, 2)}</pre>
+        </div>
+      );
+    };
+    return <SizeStateUser />;
+  }}
+</Playground>
+
+### Stateful Example with an Existing Ref
+
+To `useSize` statefully with an existing [ref object], pass it to `useSize`.
+It will return _just_ a [Size] state
+(_not_ an array):
+
+```ts
+function useSize(providedRef: React.RefObject<HTMLElement>): Size;
+```
+
+The existing [ref object] should be attached to the DOM element to be measured.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
+
+<Playground>
+  {() => {
+    const SizeStateUser = () => {
+      // Since we aren't using a callback ref from `useSize`,
+      // we use `useRefCallback()` to rerender whenever
+      // the ref's current value changes.
+      const [ref, setRef] = useRefCallback(null);
+      const size = useSize(ref);
+      return (
+        <div
+          ref={setRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <pre>{JSON.stringify(size, null, 2)}</pre>
+        </div>
+      );
+    };
+    return <SizeStateUser />;
+  }}
+</Playground>
+
+## Stateless
+
+Sometimes (often for performance reasons), a component wants to derive state
+from size changes, or debounce or otherwise throttle updates caused by changes.
+In these cases, `useSize` provides a **stateless** API.
+
+### Stateless Example
+
+To `useSize` statelessly, call `useSize` with a [handler] function.
+It will return _just_ a [callback ref] (_not_ an array):
+
+```ts
+function useSize(
+  handler: (size: Size) => void,
+): (node: HTMLElement | null) => void;
+```
+
+The returned [callback ref] should be attached to the DOM element to be measured.
+
+<Playground>
+  {() => {
+    const SizeUser = () => {
+      // We use a state setter as our callback for demo purposes.
+      // This is just to rerender whenever `useSize` calls it.
+      const [size, setSize] = React.useState(null);
+      const ref = useSize(setSize);
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <pre>{JSON.stringify(size, null, 2)}</pre>
+        </div>
+      );
+    };
+    return <SizeUser />;
+  }}
+</Playground>
+
+### Stateless Example With an Existing Ref
+
+To `useSize` statelessly with an existing [ref object], pass the [ref object]
+and a [handler] function. It will return `undefined` (_not_ an array):
+
+```ts
+function useSize(
+  ref: React.RefObject<HTMLElement>,
+  handler: (size: Size) => void,
+): void;
+```
+
+The existing [ref object] should be attached to the DOM element to be measured.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
+
+<Playground>
+  {() => {
+    const SizeUser = () => {
+      // We use a state setter as our callback for demo purposes.
+      // This is just to rerender whenever `useSize` calls it.
+      const [size, setSize] = React.useState(null);
+      // Since we aren't using a callback ref from `useSize`,
+      // we use `useRefCallback()` to rerender whenever
+      // the ref's current value changes.
+      const [ref, setRef] = useRefCallback(null);
+      useSize(ref, setSize);
+      return (
+        <div
+          ref={setRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <pre>{JSON.stringify(size, null, 2)}</pre>
+        </div>
+      );
+    };
+    return <SizeUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useSize` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useSize` accepts an optional [ref object].
+
+It could be used with ref forwarding like:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useSize`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useSize` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  const size = useSize(forwardedRef);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(size, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useSize`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useSize` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  const size = useSize(ref);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(size, null, 2)}</div>;
+};
+```
+
+## Handler
+
+`handler: (size: Size) => void,`
+
+A function to handle size updates.
+Receives the latest [Size]. This is passed to `useSize` when
+a component has a [stateless] use case. For simpler [stateful] use cases,
+no handler is necessary.
+
+## Size
+
+The `Size` object is a [DOMRect]-like object with additional
+`vw` and `vh` measurements, where `vw` is the [DOMRect] width as a
+percentage of the viewport width, and `vh` is the [DOMRect] height
+as a percentage of the viewport height. It also includes `borderBoxSize`
+and `contentBoxSize` information from [ResizeObserverEntry].
+
+```ts
+interface Size {
+  /** The x coordinate of the DOMRect's origin. */
+  readonly x: number;
+  /** The y coordinate of the DOMRect's origin. */
+  readonly y: number;
+  /** The width of the DOMRect. */
+  readonly width: number;
+  /** The height of the DOMRect. */
+  readonly height: number;
+  /**
+   * The top coordinate value of the DOMRect
+   * (has the same value as y, or y + height if height is negative.)
+   */
+  readonly top: number;
+  /**
+   * The right coordinate value of the DOMRect
+   * (has the same value as x + width, or x if width is negative.)
+   */
+  readonly right: number;
+  /**
+   * The bottom coordinate value of the DOMRect
+   * (has the same value as y + height, or y if height is negative.)
+   */
+  readonly bottom: number;
+  /**
+   * The left coordinate value of the DOMRect
+   * (has the same value as x, or x + width if width is negative.)
+   */
+  readonly left: number;
+  /**
+   * The DOMRect width as a percentage of the viewport width
+   * (where 0 is 0% and 1 is 100%.)
+   */
+  readonly vw: number;
+  /**
+   * The DOMRect height as a percentage of the viewport height
+   * (where 0 is 0% and 1 is 100%.)
+   */
+  readonly vh: number;
+  /**
+   * An object containing the new border box size of the observed element.
+   * The border box size accounts for border and padding on the element.
+   */
+  readonly borderBoxSize: {
+    /**
+     * The length of the observed element's border box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's border box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
+  /**
+   * An object containing the new content box size of the observed element.
+   * The content box size does not account for border or padding on the element.
+   */
+  readonly contentBoxSize: {
+    /**
+     * The length of the observed element's content box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's content box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
+}
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[domrect]: https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+[resizeobserverentry]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry
+[userefcallback]: /use-ref-callback
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding
+[stateful]: #stateful
+[stateless]: #stateless
+[size]: #size
+[handler]: #handler

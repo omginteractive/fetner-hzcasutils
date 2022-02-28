@@ -1,0 +1,31 @@
+{
+  "name": "@hzdg/use-size",
+  "description": "A React hook for components that care about their size.",
+  "version": "4.0.15",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/use-size"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/resize-observable": "^2.0.12",
+    "@hzdg/use-ref-callback": "^2.0.4",
+    "@hzdg/windowsize-monitor": "^2.0.6",
+    "memoize-one": "5.1.1"
+  }
+}

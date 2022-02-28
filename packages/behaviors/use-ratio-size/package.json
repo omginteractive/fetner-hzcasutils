@@ -1,0 +1,32 @@
+{
+  "name": "@hzdg/use-ratio-size",
+  "description": "A React hook to get a rational width and a height for an element to allow it to cover its container",
+  "version": "1.0.5",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/use-ratio-size"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/windowsize-monitor": "^2.0.6"
+  }
+}

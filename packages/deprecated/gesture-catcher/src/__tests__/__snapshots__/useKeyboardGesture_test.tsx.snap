@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useKeyboardGesture passes gesture states to a handler 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "key": "Space",
+  "repeat": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keydown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useKeyboardGesture passes gesture states to a handler 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "key": "Space",
+  "repeat": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keydown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useKeyboardGesture passes gesture states to a handler 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "key": "Space",
+  "repeat": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keydown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useKeyboardGesture passes gesture states to a handler 4`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "key": "Space",
+  "repeat": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keyup",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useKeyboardGesture uses an existing ref 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "key": "ArrowDown",
+  "repeat": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keydown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useKeyboardGesture uses an existing ref 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "key": "ArrowDown",
+  "repeat": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "keyup",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;

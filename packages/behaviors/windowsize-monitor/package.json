@@ -1,0 +1,31 @@
+{
+  "name": "@hzdg/windowsize-monitor",
+  "description": "A React component and set of hooks for monitoring window size",
+  "version": "2.0.6",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/windowsize-monitor"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3"
+  }
+}

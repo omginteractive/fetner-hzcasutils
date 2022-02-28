@@ -1,0 +1,36 @@
+{
+  "name": "@hzdg/sticky",
+  "version": "1.0.9",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/ui-components/sticky"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/examples",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.10.2",
+    "@hzdg/dom-utils": "^2.0.3",
+    "@hzdg/scroll-monitor": "^4.0.14",
+    "@hzdg/use-ref-callback": "^2.0.4",
+    "@hzdg/use-size": "^4.0.15"
+  }
+}

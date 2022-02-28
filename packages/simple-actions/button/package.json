@@ -1,0 +1,18 @@
+{
+  "name": "@hzdg/button",
+  "version": "0.0.6",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "react": "^16.2.0"
+  }
+}

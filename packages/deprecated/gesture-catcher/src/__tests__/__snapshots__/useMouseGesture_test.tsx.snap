@@ -1,0 +1,253 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useMouseGesture passes gesture states to a handler 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousedown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture passes gesture states to a handler 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousemove",
+  "x": 5,
+  "xDelta": 5,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 5,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture passes gesture states to a handler 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousemove",
+  "x": 3,
+  "xDelta": 3,
+  "xInitial": 0,
+  "xPrev": 5,
+  "xVelocity": -2,
+  "y": 5,
+  "yDelta": 5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 5,
+}
+`;
+
+exports[`useMouseGesture passes gesture states to a handler 4`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mouseup",
+  "x": 3,
+  "xDelta": 3,
+  "xInitial": 0,
+  "xPrev": 5,
+  "xVelocity": -2,
+  "y": 5,
+  "yDelta": 5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 5,
+}
+`;
+
+exports[`useMouseGesture resubscribes on config changes: no config 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousedown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture resubscribes on config changes: no config 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousemove",
+  "x": 1,
+  "xDelta": 1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture resubscribes on config changes: no config 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mouseup",
+  "x": 1,
+  "xDelta": 1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture resubscribes on config changes: threshold 10 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousemove",
+  "x": 11,
+  "xDelta": 0,
+  "xInitial": 11,
+  "xPrev": 11,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture resubscribes on config changes: threshold 10 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mouseup",
+  "x": 11,
+  "xDelta": 0,
+  "xInitial": 11,
+  "xPrev": 11,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture uses an existing ref 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousedown",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useMouseGesture uses an existing ref 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mousemove",
+  "x": 3,
+  "xDelta": 3,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 3,
+  "y": 5,
+  "yDelta": 5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 5,
+}
+`;
+
+exports[`useMouseGesture uses an existing ref 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "mouseup",
+  "x": 3,
+  "xDelta": 3,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 3,
+  "y": 5,
+  "yDelta": 5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 5,
+}
+`;

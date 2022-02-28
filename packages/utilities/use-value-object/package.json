@@ -1,0 +1,31 @@
+{
+  "name": "@hzdg/use-value-object",
+  "description": "A React hook for components that want to memoize shallowly equal values",
+  "version": "1.0.6",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/use-value-object"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "eslint-config-hzdg/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {"*": ["types/*"]},
+    "isolatedModules": true
+  },
+  "exclude": ["**/es/**/*", "**/cjs/**/*", "**/umd/**/*"]
+}

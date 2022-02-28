@@ -1,0 +1,51 @@
+---
+name: WindowsizeMonitor
+menu: Headless Components
+route: /windowsize-monitor
+---
+
+import {Playground} from 'docz';
+import WindowsizeMonitor from './src/index.tsx';
+
+# WindowsizeMonitor
+
+The component is used to determine the size (width & height) of the [window].
+Some use cases may include transforming the desktop nav to mobile navigation,
+or to create a conditional rendering of components in the section depending on
+the viewport size. It subscribes to a resize event and caches the events for
+optimization purposes when using this hook/render prop in multiple components
+on the page.
+
+> To use with a hook (requires react v. 16.8+) see [useWindowSize]
+
+## Installation
+
+```shell
+yarn add @hzdg/windowsize-monitor
+```
+
+## Usage
+
+```js
+import WindowsizeMonitor from '@hzdg/windowsize-monitor';
+```
+
+## Example
+
+<Playground>
+  <WindowsizeMonitor>
+    {({width, height}) => (
+      <pre style={{width: '100%', height: '100%'}}>
+        current width is {JSON.stringify(width, null, 2)}
+        <br />
+        current height is {JSON.stringify(height, null, 2)}
+      </pre>
+    )}
+  </WindowsizeMonitor>
+</Playground>
+
+[window]: https://developer.mozilla.org/en-US/docs/Web/API/Window
+[usewindowsize]: /use-window-size
+[installation]: #installation
+[usage]: #usage
+[example]: #example

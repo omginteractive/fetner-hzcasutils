@@ -1,0 +1,211 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useSize gets the initial size 1`] = `
+<div
+  data-testid="size"
+  style="width: 120px; height: 120px;"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 120,
+  "bottom": 120,
+  "left": 0,
+  "width": 120,
+  "height": 120,
+  "vw": 0.12,
+  "vh": 0.16,
+  "borderBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  },
+  "contentBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  }
+}
+</div>
+`;
+
+exports[`useSize passes the initial size to a handler 1`] = `
+Array [
+  Array [
+    Object {
+      "borderBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
+      "bottom": 120,
+      "contentBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
+      "height": 120,
+      "left": 0,
+      "right": 120,
+      "top": 0,
+      "vh": 0.16,
+      "vw": 0.12,
+      "width": 120,
+      "x": 0,
+      "y": 0,
+    },
+  ],
+]
+`;
+
+exports[`useSize resubscribes to changed refs 1`] = `
+<div
+  data-testid="size"
+>
+  <div
+    style="width: 1px; height: 1px;"
+  >
+    {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 1,
+  "bottom": 1,
+  "left": 0,
+  "width": 1,
+  "height": 1,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "inlineSize": 1,
+    "blockSize": 1
+  },
+  "contentBoxSize": {
+    "inlineSize": 1,
+    "blockSize": 1
+  }
+}
+  </div>
+  <div
+    style="width: 2px; height: 2px;"
+  >
+    see above
+  </div>
+</div>
+`;
+
+exports[`useSize resubscribes to changed refs 2`] = `
+<div
+  data-testid="size"
+>
+  <div
+    style="width: 1px; height: 1px;"
+  >
+    see below
+  </div>
+  <div
+    style="width: 2px; height: 2px;"
+  >
+    {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 2,
+  "bottom": 2,
+  "left": 0,
+  "width": 2,
+  "height": 2,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "inlineSize": 2,
+    "blockSize": 2
+  },
+  "contentBoxSize": {
+    "inlineSize": 2,
+    "blockSize": 2
+  }
+}
+  </div>
+</div>
+`;
+
+exports[`useSize uses an existing ref 1`] = `
+<div
+  data-testid="size"
+  style="width: 120px; height: 120px;"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 120,
+  "bottom": 120,
+  "left": 0,
+  "width": 120,
+  "height": 120,
+  "vw": 0.12,
+  "vh": 0.16,
+  "borderBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  },
+  "contentBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  }
+}
+</div>
+`;
+
+exports[`useSize uses an existing ref and a handler 1`] = `
+Array [
+  Array [
+    Object {
+      "borderBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
+      "bottom": 120,
+      "contentBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
+      "height": 120,
+      "left": 0,
+      "right": 120,
+      "top": 0,
+      "vh": 0.16,
+      "vw": 0.12,
+      "width": 120,
+      "x": 0,
+      "y": 0,
+    },
+  ],
+]
+`;
+
+exports[`useSize works on iframed elements 1`] = `
+<div
+  data-testid="size"
+  style="width: 120px; height: 120px;"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 0,
+  "bottom": 0,
+  "left": 0,
+  "width": 0,
+  "height": 0,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "blockSize": 0,
+    "inlineSize": 0
+  },
+  "contentBoxSize": {
+    "blockSize": 0,
+    "inlineSize": 0
+  }
+}
+</div>
+`;

@@ -1,0 +1,534 @@
+---
+name: usePageGesture
+menu: Deprecated
+route: /use-page-gesture
+---
+
+import {Playground, Props} from 'docz';
+import {
+  usePageGesture,
+  VERTICAL,
+  NEXT,
+  PREVIOUS,
+  FIRST,
+  LAST,
+} from './src';
+import {useGesture} from '../gesture-catcher/src';
+import useSize from '@hzdg/use-size';
+import {useSpring, animated, config as springConfig} from 'react-spring';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] with [swipe] detection for binding to gestures
+
+# usePageGesture
+
+A React [hook] for components that want to handle pagination via gestures.
+
+## What's this for?
+
+[Pagination] is a familiar idea, but a tricky behavior to implement. Perhaps
+the most commonly seen implementation has simple 'next' and 'previous' buttons
+that change an active page index when pressed.
+
+An increasingly common alternative (or _additional_) implementation
+requires changing the active page index in response to other forms of input,
+such as [key presses], [touch] or [mouse] drag, [mouse wheel or touchpad].
+
+This component aims to simplify implementing this kind of gesture-based
+pagination. Some things it does:
+
+- Calculates a pagination intent from a gesture, i.e.,
+  if the gesture moved to the left, then a 'previous' intention
+  will be assigned (with the default configuration).
+- Guards against accidental gestures with a configurable threshold.
+  Gestures that don't clear the threshold will not be assigned
+  any pagination intent.
+- Allows 'canceling' of a gesture by moving in the opposite direction
+  of a previously assigned intention before ending.
+- Automatically does the right thing for common pagination key presses,
+  including arrow keys, spacebar, page up/down, home and end keys.
+- Supports horizontal (the default) or vertical gestures.
+
+## Installation
+
+```shell
+yarn add @hzdg/page-gesture
+```
+
+## Usage
+
+```
+import {usePageGesture} from '@hzdg/page-gesture';
+```
+
+### Signature
+
+```ts
+function usePageGesture(
+  handler: PaginationChangeHandler | PaginationHandlers,
+  config?: PageGestureConfig | null,
+): (state: GestureLike) => void;
+```
+
+### handler `handler: PaginationChangeHandler | PaginationHandlers,`
+
+A function to handle pagination actions, or a configuration of handlers,
+like `{onNext?, onPrevious?, onFirst?, onLast?}`.
+
+See [PaginationChangeHandler], [PaginationHandlers],
+and [PaginationAction] for more.
+
+### config `config?: PageGestureConfig | null,`
+
+Optional configuration for the page gesture.
+
+See [PageGestureConfig] for more.
+
+### returns `(state: GestureLike) => void`
+
+A callback that accepts a `GestureLike` state object.
+
+See [GestureLike], [KeyGestureLike], [HorizontalGestureLike],
+and [VerticalGestureLike] for more.
+
+## PaginationChangeHandler
+
+A function that handles changes to pagination triggered by a gesture.
+
+Receives the [PaginationAction] that corresponds
+to the intention assigned to the gesture.
+
+```ts
+type PaginationChangeHandler = (action: PaginationAction) => void;
+```
+
+For example, this function can do things like increment or decrement an index
+when called with the `next` or `previous` actions:
+
+```ts
+import {
+  usePageGesture,
+  NEXT,
+  PREVIOUS,
+  FIRST,
+  LAST,
+} from '@hzdg/page-gesture';
+function usePagination(numPages) {
+  const [index, setPage] = React.useState(0);
+  const handleGesture = usePageGesture(action => {
+    switch (action) {
+      case NEXT:
+        setIndex(i => Math.max(numPages - 1, i + 1));
+        break;
+      case PREVIOUS:
+        setIndex(i => Math.min(0, i - 1));
+        break;
+      case FIRST:
+        setIndex(0);
+        break;
+      case LAST:
+        setIndex(numPages - 1);
+        break;
+    }
+  });
+  return [index, handleGesture];
+}
+```
+
+## PaginationHandlers
+
+An object with optional `onNext`, `onPrevious`, `onFirst`,
+and/or `onLast` methods.
+
+If defined, each of these methods is called when the
+corresponding [PaginationAction] is assigned to a gesture.
+
+```ts
+interface PaginationHandlers {
+  onNext?: () => void;
+  onPrevious?: () => void;
+  onFirst?: () => void;
+  onLast?: () => void;
+}
+```
+
+For example, these methods can do things like increment or decrement
+an index when called:
+
+```ts
+import {usePageGesture} from '@hzdg/page-gesture';
+function usePagination(numPages) {
+  const [index, setIndex] = React.useState(0);
+  const handleGesture = usePageGesture({
+    onNext: () => setIndex(i => Math.max(numPages - 1, i + 1)),
+    onPrevious: () => setIndex(i => Math.min(0, i - 1)),
+    onFirst: () => setIndex(0),
+    onLast: () => setIndex(numPages - 1),
+  });
+  return [index, handleGesture];
+}
+```
+
+## PageGestureConfig
+
+An object describing configuration for page gesture management.
+This is optionally provided to [usePageGesture].
+
+```ts
+interface PageGestureConfig {
+  /**
+   * The orientation in which gestures can be interpreted as pagination actions.
+   */
+  orientation?: 'vertical' | 'horizontal';
+  /**
+   * The minimum distance a gesture must have _cumulatively_
+   * traveled in order to be assigned a pagination intent.
+   */
+  threshold?: number;
+}
+```
+
+## PaginationAction
+
+An action that has been assigned as the intention of a gesture.
+
+All of these actions can be handled in a [PaginationChangeHandler]
+or any of them can be handled by defining the corresponding `on<Action>`
+methods on a [PaginationHandlers] object.
+
+```ts
+  action: 'next' | 'previous' | 'first' | 'last' | 'canceled',
+```
+
+When the gesture callback (returned from [usePageGesture])
+receives a [GestureLike] object, it is analyzed for characteristics
+that might be interpreted as an _intention_ to perform a particular
+pagination gesture. If an intention is determined, and the gesture
+has ended, then the intention is mapped to the appropriate
+[PaginationAction], based on the orientation specified in [PageGestureConfig]
+(or based on a horizontal orientation, if not specified).
+
+The outline of the intention algorithm is:
+
+- For a `HORIZONTAL` orientation:
+  - A gesture in the `RIGHT` direction is assigned a `PREVIOUS` action.
+  - A gesture in the `LEFT` direction is assigned a `NEXT` action.
+  - An `ArrowLeft` keypress is assigned a `PREVIOUS` action.
+  - An `ArrowRight` keypress is assigned a `NEXT` action.
+  - A `Home` keypress is assign a `FIRST` action
+  - An `End` keypress is assign a `LAST` action
+- For a `VERTICAL` orientation:
+  - A gesture in the `DOWN` direction is assigned a `PREVIOUS` action.
+  - A gesture in the `UP` direction is assigned a `NEXT` action.
+  - An `ArrowDown` keypress is assigned a `PREVIOUS` action.
+  - An `ArrowUp` keypress is assigned a `NEXT` action.
+  - A `Space` keypress is assigned a `NEXT` action
+  - A `PageDown` keypress is assigned a `NEXT` action
+  - A `PageUp` keypress is assigned a `PREVIOUS` action
+  - A `Home` keypress is assign a `FIRST` action
+  - An `End` keypress is assign a `LAST` action
+
+For gestures that have direction (`UP`, `RIGHT`, `DOWN`, `LEFT`),
+their intention is determined by examining the [HorizontalGestureLike]
+or [VerticalGestureLike] objects for a completed gesture that nets a
+delta that is absolutely larger than the threshold specified
+in [PageGestureConfig], or the default threshold of `50`, if not specified.
+
+## GestureLike
+
+An object that is passed to the callback returned by [usePageGesture].
+This object should include either data in the shape of a [KeyGestureLike]
+object, or a [VerticalGestureLike] object if orientation is vertical,
+or a [HorizontalGestureLike] object.
+
+A likely source for objects of this shape could be a [gesture] hook,
+or any of the [mouse], [touch], [wheel] or [keyboard] gesture hooks.
+
+```ts
+type GestureLike = KeyGestureLike | HorizontalGestureLike | VerticalGestureLike;
+```
+
+## KeyGestureLike
+
+An object that represents a gesture triggered by a keypress.
+Should specify the key that was pressed, and whether or not the gesture
+has completed.
+
+```ts
+interface KeyGestureLike {
+  key:
+    | 'Space'
+    | 'PageUp'
+    | 'PageDown'
+    | 'End'
+    | 'Home'
+    | 'ArrowLeft'
+    | 'ArrowUp'
+    | 'ArrowRight'
+    | 'ArrowDown';
+  gesturing: boolean;
+}
+```
+
+## HorizontalGestureLike
+
+An object that represents a gesture in the horizontal orientation.
+Should specify the cumulative delta in the x (horizontal) direction
+from the gesture's start to the end, and whether or not the gesture
+has completed.
+
+```ts
+interface HorizontalGestureLike {
+  xDelta: number;
+  gesturing: boolean;
+}
+```
+
+## VerticalGestureLike
+
+An object that represents a gesture in the vertical orientation.
+Should specify the cumulative delta in the y (vertical) direction
+from the gesture's start to the end, and whether or not the gesture
+has completed.
+
+```ts
+interface VerticalGestureLike {
+  yDelta: number;
+  gesturing: boolean;
+}
+```
+
+## Example
+
+A horizontal example using [size] and [gesture] detection
+and [react-spring] transitions.
+
+<Playground>
+  {() => {
+    const PAGE_SIZE = 500; // Size of a page in px
+    const TOTAL_PAGES = 10; // Total number of pages
+    const GESTURE_CONFIG = {preventDefault: true, threshold: 0};
+    /**
+     * A Page component.
+     * Shows the page number and highlights when active.
+     */
+    const Page = ({label, active}) => {
+      const color = useSpring({
+        backgroundColor: active ? 'blue' : 'lightgray',
+        color: active ? 'lightblue' : 'gray',
+      });
+      return (
+        <animated.div
+          style={{
+            display: 'flex',
+            flex: 1,
+            flexBasis: `${100 / TOTAL_PAGES}%`,
+            justifyContent: 'center',
+            alignItems: 'center',
+            ...color,
+          }}
+        >
+          <h1 style={{fontFamily: 'sans-serif', fontSize: '500px'}}>{label}</h1>
+        </animated.div>
+      );
+    };
+    const HorizontalPageGestureUser = () => {
+      const page = React.useRef(0);
+      const pageWidth = React.useRef(0);
+      const [, flipUpdateBit] = React.useState(false);
+      const forceUpdate = React.useCallback(() => flipUpdateBit(v => !v), []);
+      const [pageSize, pageSizeRef] = useSize();
+      pageWidth.current = pageSize.width;
+      const [transform, setTransform] = useSpring(() => ({
+        config: springConfig.stiff,
+        transform: `translateX(${page.current * -pageWidth.current}px)`,
+      }));
+      const pageHandler = React.useCallback(
+        action => {
+          switch (action) {
+            case NEXT:
+              page.current = Math.min(TOTAL_PAGES - 1, page.current + 1);
+              break;
+            case PREVIOUS:
+              page.current = Math.max(0, page.current - 1);
+              break;
+            case FIRST:
+              page.current = 0;
+              break;
+            case LAST:
+              page.current = TOTAL_PAGES - 1;
+              break;
+          }
+          setTransform({
+            transform: `translateX(${page.current * -pageWidth.current}px)`,
+          });
+          forceUpdate();
+        },
+        [page, pageWidth, setTransform, forceUpdate],
+      );
+      const updatePagination = usePageGesture(pageHandler);
+      const handleGesture = React.useCallback(
+        gesture => {
+          setTransform({
+            immediate: gesture.gesturing,
+            transform: `translateX(${gesture.xDelta +
+              page.current * -pageWidth.current}px)`,
+          });
+          updatePagination(gesture);
+        },
+        [updatePagination, setTransform],
+      );
+      const gestureRef = useGesture(handleGesture, GESTURE_CONFIG);
+      return (
+        <div
+          tabIndex={1}
+          ref={pageSizeRef}
+          style={{
+            overflow: 'hidden',
+            width: pageSize.width ? pageSize.width : '100%',
+            height: PAGE_SIZE,
+          }}
+        >
+          <animated.div
+            ref={gestureRef}
+            style={{
+              display: 'flex',
+              width: pageSize.width * TOTAL_PAGES,
+              height: PAGE_SIZE,
+              ...transform,
+            }}
+          >
+            {Array.apply(null, Array(TOTAL_PAGES)).map((_, i) => (
+              <Page key={i} label={i} active={i === page.current} />
+            ))}
+          </animated.div>
+        </div>
+      );
+    };
+    return <HorizontalPageGestureUser />;
+  }}
+</Playground>
+
+A vertical example using [gesture] detection and [react-spring] transitions.
+
+<Playground>
+  {() => {
+    const PAGE_SIZE = 500; // Size of a page in px
+    const TOTAL_PAGES = 10; // Total number of pages
+    const PAGE_CONFIG = {orientation: VERTICAL};
+    const GESTURE_CONFIG = {preventDefault: true, threshold: 0};
+    /**
+     * A Page component.
+     * Shows the page number and highlights when active.
+     */
+    const Page = ({label, active}) => {
+      const color = useSpring({
+        backgroundColor: active ? 'blue' : 'lightgray',
+        color: active ? 'lightblue' : 'gray',
+      });
+      return (
+        <animated.div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            ...color,
+          }}
+        >
+          <h1 style={{fontFamily: 'sans-serif', fontSize: '500px'}}>{label}</h1>
+        </animated.div>
+      );
+    };
+    /**
+     * A Component that uses gesture input to control pagination,
+     * and a react-spring transform to animate page and gesture transitions.
+     */
+    const PageGestureUser = () => {
+      const page = React.useRef(0);
+      const [, flipUpdateBit] = React.useState(false);
+      const forceUpdate = React.useCallback(() => flipUpdateBit(v => !v), []);
+      const [transform, setTransform] = useSpring(() => ({
+        config: springConfig.stiff,
+        transform: `translateY(${page.current * -PAGE_SIZE}px)`,
+      }));
+      const pageHandler = React.useCallback(
+        action => {
+          switch (action) {
+            case NEXT:
+              page.current = Math.min(TOTAL_PAGES - 1, page.current + 1);
+              break;
+            case PREVIOUS:
+              page.current = Math.max(0, page.current - 1);
+              break;
+            case FIRST:
+              page.current = 0;
+              break;
+            case LAST:
+              page.current = TOTAL_PAGES - 1;
+              break;
+          }
+          setTransform({
+            transform: `translateY(${page.current * -PAGE_SIZE}px)`,
+          });
+          forceUpdate();
+        },
+        [page, setTransform, forceUpdate],
+      );
+      const updatePagination = usePageGesture(pageHandler, PAGE_CONFIG);
+      const gestureHandler = React.useCallback(
+        gesture => {
+          setTransform({
+            transform: `translateY(${gesture.yDelta +
+              page.current * -PAGE_SIZE}px)`,
+          });
+          updatePagination(gesture);
+        },
+        [page, updatePagination],
+      );
+      const ref = useGesture(gestureHandler, GESTURE_CONFIG);
+      return (
+        <div
+          tabIndex={1}
+          ref={ref}
+          style={{overflow: 'hidden', width: '100%', height: PAGE_SIZE}}
+        >
+          <animated.div style={{height: '100%', ...transform}}>
+            {Array.apply(null, Array(TOTAL_PAGES)).map((_, i) => (
+              <Page key={i} label={i} active={i === page.current} />
+            ))}
+          </animated.div>
+        </div>
+      );
+    };
+    return <PageGestureUser />;
+  }}
+</Playground>
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[pagination]: https://en.wikipedia.org/wiki/Pagination
+[size]: /use-size
+[gesture]: /use-gesture
+[key presses]: /use-keyboard-gesture
+[keyboard]: /use-keyboard-gesture
+[touch]: /use-touch-gesture
+[mouse]: /use-mouse-gesture
+[mouse wheel or touchpad]: /use-wheel-gesture
+[wheel]: /use-wheel-gesture
+[react-spring]: https://www.react-spring.io
+[usepagegesture]: #usage
+[paginationchangehandler]: #paginationchangehandler
+[paginationhandlers]: #paginationhandlers
+[pagegestureconfig]: #pagegestureconfig
+[paginationaction]: #paginationaction
+[gesturelike]: #gesturelike
+[keygesturelike]: #keygesturelike
+[horizontalgesturelike]: #horizontalgesturelike
+[verticalgesturelike]: #verticalgesturelike
+[react-use-gesture]: https://use-gesture.netlify.app/
+[swipe]: https://use-gesture.netlify.app/docs/state#swipe-drag-only
+[@hzdg/usekeypress]: /use-key-press

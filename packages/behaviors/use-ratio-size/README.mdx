@@ -1,0 +1,225 @@
+---
+name: useRatioSize
+menu: Hooks
+route: /use-ratio-size
+---
+
+import { Playground, Props } from 'docz'
+import useRatioSize from './src';
+
+# useRatioSize
+
+Calculates a width and a height for a container that covers the current viewport size for a given ratio.
+<hr />
+
+## Installation
+
+```shell
+yarn add @hzdg/use-ratio-size
+```
+<Props of={useRatioSize}  />
+<hr />
+
+## Usage
+
+```js
+const [playerSize, updateRatioSize] = useRatioSize();
+```
+
+### Example
+Window Size example using the viewport size (default behavior)
+```js
+import useRatioSize from '@hzdg/use-ratio-size';
+
+function MyContainer = () => {
+  const [playerSize] = useRatioSize();
+
+  return (
+    <>
+      <p>A 16:9 container size to fill current viewport:</p>
+      <p>width: {playerSize.width} height: {playerSize.height}</p>
+    </>
+  );
+}
+```
+
+<Playground>
+  {() => {
+    const MyContainer = () => {
+      const [playerSize] = useRatioSize();
+
+      return (
+        <React.Fragment>
+          <p>A 16:9 container size to fill current viewport:</p>
+          <p>width: {playerSize.width} height: {playerSize.height}</p>
+        </React.Fragment>
+      );
+    }
+    return <MyContainer />;
+  }}
+</Playground>
+
+Container Size example using the container's ref
+```js
+import useRatioSize from '@hzdg/use-ratio-size';
+
+function MyContainer = () => {
+  const parentRef = React.createRef() as React.MutableRefObject<HTMLDivElement | null>;
+  const getParentRef = () => parentRef;
+  const [playerSize] = useRatioSize({options: {containerRef: getParentRef}});
+
+  return (
+    <>
+      <p>Ratio: 16:9<br />Parent Container: 200 x 200  (orange box)</p>
+      <p>calculated width: {playerSize.width},<br />
+      height: {playerSize.height} (dotted blue box)</p>
+      <section 
+        style={{
+          height: '230px', 
+          position: 'relative'
+        }}
+      >
+        <div 
+          ref={parentRef} 
+          style={{
+            width: '200px', 
+            height: '200px', 
+            border: '2px solid #f38230'
+          }}
+        >
+          <div 
+            style={{
+              top: 0, 
+              left: 0, 
+              position: 'absolute', 
+              textAlign: 'left', 
+              border: `2px dotted navy`,
+              width: `${playerSize.width}px`, 
+              height: `${playerSize.height}px`, 
+            }} 
+          />
+        </div>
+      </section>
+    </>
+  );
+}
+```
+
+<Playground>
+  {() => {
+    const MyContainer = () => {
+      const parentRef = React.createRef();
+      const getParentRef = () => parentRef;
+      const [playerSize] = useRatioSize({options: {containerRef: getParentRef}});
+      return (
+        <React.Fragment>
+          <p>Ratio: 16:9<br />Parent Container: 200 x 200  (orange box)</p>
+          <p>calculated width: {playerSize.width},<br />
+          height: {playerSize.height} (dotted blue box)</p>
+          <section 
+            style={{
+              height: '230px', 
+              position: 'relative'
+            }}
+          >
+            <div 
+              ref={parentRef} 
+              style={{
+                width: '200px', 
+                height: '200px', 
+                border: '2px solid #f38230'
+              }}
+            >
+              <div 
+                style={{
+                  top: 0, 
+                  left: 0, 
+                  position: 'absolute', 
+                  textAlign: 'left', 
+                  border: `2px dotted navy`,
+                  width: `${playerSize.width}px`, 
+                  height: `${playerSize.height}px`, 
+                }} 
+              />
+            </div>
+          </section>
+        </React.Fragment>
+      );
+    }
+    return <MyContainer />;
+  }}
+</Playground>
+
+<hr />
+
+## Config
+```tsx
+export default function useRatioSize(settings: UseRatioProps | null): (RatioSizeProps | (() => void))[];
+```
+
+`settings: UseRatioProps | void`
+
+Optional settings when setting the ratio
+```tsx
+export interface UseRatioProps {
+  initialState?: RatioSizeProps | null;
+  options?: RatioSizeConfigProps | null;
+}
+```
+
+### `initialState?: RatioSizeProps | null`
+Optional initial width and height for container
+```tsx
+export interface RatioSizeProps {
+  width: number | string;
+  height: number | string;
+}
+```
+
+### `options?: RatioSizeConfigProps | null`
+Optional options for calculating ratio size
+```tsx
+export interface RatioSizeOptionsProps {
+  responsiveBreaks?: ResponsiveBreakProps[];
+  ratio?: number;
+  containerRef?: () => {
+    current: {offsetWidth: number | null; offsetHeight: number | null} | null;
+  } | null;
+}
+
+export interface ResponsiveBreakProps {
+  breakpoint: number;
+  ratioSize: RatioSizeProps;
+}
+```
+  Example:
+  ```tsx
+  const [playerSize] = useRatioSize({
+      options: {
+        responsiveBreaks: [
+          {
+            breakpoint: '900',
+            ratioSize: {
+              width: '100%',
+              height: '100%',
+            },
+          },
+        ],
+      },
+    });
+  ```
+
+#### `responsiveBreaks: ResponsiveBreakProps[]`
+Size overrides for certain breakpoints. Breakpoints are applied as mobile-first styling using `min-width`.
+```tsx
+export interface ResponsiveBreakProps {
+  breakpoint: number;
+  ratioSize: RatioSizeProps;
+}
+```
+
+#### `ratio?: number` 
+Optional ratio number, default: 0.5625 (16:9 with `height / width`)
+
+#### `containerRef?: () => {current: {offsetWidth: number | null; offsetHeight: number | null} | null;} | null;`
+The ref of a parent container passed as a function that dictates the size of the ratio size instead of the default window viewport size.

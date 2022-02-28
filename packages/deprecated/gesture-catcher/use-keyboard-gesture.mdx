@@ -1,0 +1,297 @@
+---
+name: useKeyboardGesture
+menu: Deprecated
+route: /use-keyboard-gesture
+---
+
+import {Playground, Props} from 'docz';
+import useKeyboardGesture from './src/useKeyboardGesture';
+import useRefCallback from '@hzdg/use-ref-callback';
+import KeyboardGestureVisualizer from './src/examples/KeyboardGestureVisualizer';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+
+# useKeyboardGesture
+
+A React [hook] for components that want to handle keyboard gesture intent.
+
+<KeyboardGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use arrow keys, spacebar, home, end, pgup, pgdown to gesture!</p>
+  <p style={{color: 'lightgray'}}>Click to reset</p>
+</KeyboardGestureVisualizer>
+
+## Installation
+
+```shell
+yarn add @hzdg/gesture-catcher
+```
+
+## Usage
+
+```js
+import {useKeyboardGesture} from '@hzdg/gesture-catcher';
+```
+
+`useKeyboardGesture` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useKeyboardGesture` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useKeyboardGesture(
+  handler: KeyboardGestureChangeHandler | KeyboardGestureHandlers,
+  config?: KeyboardGestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useKeyboardGesture(
+  providedRef: React.RefObject<HTMLElement>,
+  handler: KeyboardGestureChangeHandler | KeyboardGestureHandlers,
+  config?: KeyboardGestureConfig | null,
+): void;
+```
+
+Note that `useKeyboardGesture` will _not_ return a [callback ref] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+## Config
+
+`config?: KeyboardGestureConfig | null`
+
+An object describing configuration for observing keyboard gestures.
+This is optionally provided to [useKeyboardGesture].
+
+```ts
+interface KeyboardGestureConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `keydown` and `keyup` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to keyboard events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+}
+```
+
+## Handler
+
+`handler: KeyboardGestureChangeHandler | KeyboardGestureHandlers`
+
+A function to handle keyboard gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [KeyboardGestureChangeHandler], [KeyboardGestureHandlers],
+[KeyboardGestureState], and [KeyboardGestureEndState] for more.
+
+### KeyboardGestureChangeHandler
+
+A function that handles changes to an ongoing or finished keyboard gesture.
+Receives [KeyboardGestureState] or [KeyboardGestureEndState] objects.
+
+```ts
+type KeyboardGestureChangeHandler = (
+  state: KeyboardGestureState | KeyboardGestureEndState,
+) => void;
+```
+
+### KeyboardGestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [KeyboardGestureState] objects,
+while `onEnd` will receive [KeyboardGestureEndState] objects.
+
+```ts
+interface KeyboardGestureHandlers {
+  onStart?: (state: KeyboardGestureState) => void;
+  onMove?: (state: KeyboardGestureState) => void;
+  onEnd?: (state: KeyboardGestureEndState) => void;
+}
+```
+
+## State
+
+`state: KeyboardGestureState | KeyboardGestureEndState`
+
+An object describing the state of an ongoing or finished keyboard gesture.
+This is provided to the [handler] or handlers.
+
+### KeyboardGestureState
+
+An object describing the latest state of an ongoing keyboard gesture.
+
+It is passed to the [KeyboardGestureChangeHandler]
+or `onStart` and `onMove` [KeyboardGestureHandlers] provided to [useKeyboardGesture].
+
+```ts
+interface KeyboardGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Whether or not the key that triggered the gesture is repeating. */
+  repeat: boolean | null;
+  /** The key that triggered the gesture. */
+  key:
+    | 'Space'
+    | 'PageUp'
+    | 'PageDown'
+    | 'End'
+    | 'Home'
+    | 'ArrowLeft'
+    | 'ArrowUp'
+    | 'ArrowRight'
+    | 'ArrowDown';
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'keydown';
+}
+```
+
+### KeyboardGestureEndState
+
+An object describing the last state of a previous keyboard gesture.
+
+It is passed to the [KeyboardGestureChangeHandler]
+or `onEnd` [KeyboardGestureHandlers] provided to [useKeyboardGesture].
+
+```ts
+interface KeyboardGestureEndState extends KeyboardGestureState {
+  /** Indicates a gesture is complete */
+  gesturing: false;
+  /** The type of event associated with the end of the gesture. */
+  type: 'keyup';
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const KeyboardGestureUser = () => {
+      const [gesture, setGesture] = React.useState('try arrow keys!');
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useKeyboardGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <KeyboardGestureUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useKeyboardGesture` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useKeyboardGesture` accepts an optional [ref object].
+
+It could be used with ref forwarding like:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  const [gesture, setGesture] = React.useState(null);
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useKeyboardGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useKeyboardGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  useKeyboardGesture(forwardedRef, setGesture);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const [gesture, setGesture] = React.useState(null);
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useKeyboardGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useKeyboardGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  useKeyboardGesture(ref, setGesture);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+};
+```
+
+``
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
+[installation]: #installation
+[usage]: #usage
+[config]: #config
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding
+[usekeyboardgesture]: #usage
+[keyboardgesturechangehandler]: #keyboardgesturechangehandler
+[keyboardgesturehandlers]: #keyboardgesturehandlers
+[keyboardgestureconfig]: #keyboardgestureconfig
+[keyboardgesturestate]: #keyboardgesturestate
+[keyboardgestureendstate]: #keyboardgestureendstate
+[@hzdg/usekeypress]: /use-key-press

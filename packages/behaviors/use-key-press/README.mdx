@@ -1,0 +1,400 @@
+---
+name: useKeyPress
+menu: Hooks
+route: /use-key-press
+---
+
+import {Playground} from 'docz';
+import {useSpring, animated, interpolate} from 'react-spring';
+import useKeyPress from './src';
+
+# useKeyPress
+
+A React [hook] for components that care about keyboard input.
+
+This hook lets you easily bind keyboard events to any React component.
+You can update state, animate elements, etc. by using the data passed
+to your handlers.
+
+## Installation
+
+```shell
+yarn add @hzdg/use-key-press
+```
+
+## Usage
+
+`useKeyPress` accepts [handlers] or [named handlers],
+along with optional [config]. It returns a [bind] callback
+that can either be used as props for [Binding to a React Element],
+or used as an effect for [Binding to a DOM Element].
+
+The most basic usage looks like:
+
+```js
+import useKeyPress from '@hzdg/use-key-press';
+
+function SomeKeyPressUser() {
+  const bind = useKeyPress(state => {
+    /** Do something when any key is pressed, repeated, or released */
+  });
+  return <div {...bind()} tabIndex={0} />;
+}
+```
+
+## Example
+
+Below is a simple example using [react-spring] to transform
+the offset and scale of an element based on arrow key presses:
+
+<Playground>
+  {() => {
+    const [focused, setFocus] = React.useState(false);
+    const [{x, y}, set] = useSpring(() => ({x: 0, y: 0}));
+    const bind = useKeyPress({
+      onArrowUp({event, down, repeat}) {
+        event.preventDefault();
+        set({y: down ? -repeat - 1 : 0});
+      },
+      onArrowDown({event, down, repeat}) {
+        event.preventDefault();
+        set({y: down ? repeat + 1 : 0});
+      },
+      onArrowLeft({event, down, repeat}) {
+        event.preventDefault();
+        set({x: down ? -repeat - 1 : 0});
+      },
+      onArrowRight({event, down, repeat}) {
+        event.preventDefault();
+        set({x: down ? repeat + 1 : 0});
+      },
+    });
+    return (
+      <div
+        {...bind()}
+        tabIndex={0}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 375,
+        }}
+      >
+        <span>{focused ? 'press the arrow keys!' : 'focus me!'}</span>
+        <animated.div
+          style={{
+            width: 40,
+            height: 40,
+            background: focused ? 'red' : 'pink',
+            transform: interpolate(
+              [x, y],
+              (x, y) => `
+            scale(${1 + Math.hypot(x, y) / 10})
+            translate(${x * 10}px, ${y * 10}px)
+          `,
+            ),
+          }}
+        />
+      </div>
+    );
+  }}
+</Playground>
+
+## Handlers
+
+`useKeyPress` has only one required argument: a handler,
+or a map of _at least one_ named handler. A handler is function
+that will be passed the key press [state] whenever it changes, or
+whenever the state matches the conditions described for the supported
+[named handlers].
+
+To handle any key event, pass a handler:
+
+```ts
+const bind = useKeyPress(state => {
+  /* do something with key press state */
+});
+```
+
+However, it is rare that you care about _every_ key event that occurs!
+
+## Named Handlers
+
+For convenience, `useKeyPress` accepts a map of named handlers that
+are called whenever the key press [state] matches the conditions
+described by the given name.
+
+### onKey
+
+The `onKey` handler is equivalent to passing a handler function
+directly to `useKeyPress`. In other words, this:
+
+```ts
+const bind = useKeyPress({
+  /** Do something with key press state */
+  onKey(state) {},
+});
+```
+
+is the same as this:
+
+```ts
+const bind = useKeyPress(state => {
+  /** Do something with key press state */
+});
+```
+
+### onKeyPress
+
+Often you only want to know if a key has been pressed.
+For that, there is `onKeyPress`:
+
+```ts
+const bind = useKeyPress({
+  /**
+   * Do something with key press state.
+   * Note that this handler will only fire when a key is initially pressed!
+   */
+  onKeyPress(state) {},
+});
+```
+
+You can think of `onKeyPress` as a convenience for handling
+the _leading_ edge of a key press-hold-release sequence.
+
+### onKeyRelease
+
+Other times you only want to know if a key has been released.
+For that, there is `onkeyRelease`:
+
+```ts
+const bind = useKeyPress({
+  /**
+   * Do something with key press state.
+   * Note that this handler will only fire when a key is released!
+   */
+  onKeyRelease(state) {},
+});
+```
+
+You can think of `onKeyPress` as a convenience for handling
+the _trailing_ edge of a press-hold-release sequence.
+
+### Named Key Handlers
+
+`useKeyPress` supports named handlers for commonly used keys.
+These handlers are patterned after that more generic [onKey], [onKeyPress],
+[onKeyRelease] handlers, but focused on just a single key. For example,
+the handlers named `onArrowDown`, `onArrowDownPress`, and `onArrowDownRelease`
+work just like their generic counterparts, except they only handle key events
+that involve the `arrowdown` key.
+
+Here is a list of supported named key handlers (`KeyPressHandler` is a function
+that accepts key press [state]):
+
+```ts
+interface NamedHandlers {
+  onArrowDown?: KeyPressHandler;
+  onArrowDownPress?: KeyPressHandler;
+  onArrowDownRelease?: KeyPressHandler;
+
+  onArrowLeft?: KeyPressHandler;
+  onArrowLeftPress?: KeyPressHandler;
+  onArrowLeftRelease?: KeyPressHandler;
+
+  onArrowRight?: KeyPressHandler;
+  onArrowRightPress?: KeyPressHandler;
+  onArrowRightRelease?: KeyPressHandler;
+
+  onArrowUp?: KeyPressHandler;
+  onArrowUpPress?: KeyPressHandler;
+  onArrowUpRelease?: KeyPressHandler;
+
+  onEnd?: KeyPressHandler;
+  onEndPress?: KeyPressHandler;
+  onEndRelease?: KeyPressHandler;
+
+  onHome?: KeyPressHandler;
+  onHomePress?: KeyPressHandler;
+  onHomeRelease?: KeyPressHandler;
+
+  onPageDown?: KeyPressHandler;
+  onPageDownPress?: KeyPressHandler;
+  onPageDownRelease?: KeyPressHandler;
+
+  onPageUp?: KeyPressHandler;
+  onPageUpPress?: KeyPressHandler;
+  onPageUpRelease?: KeyPressHandler;
+
+  onEscape?: KeyPressHandler;
+  onEscapePress?: KeyPressHandler;
+  onEscapeRelease?: KeyPressHandler;
+
+  onEnter?: KeyPressHandler;
+  onEnterPress?: KeyPressHandler;
+  onEnterRelease?: KeyPressHandler;
+
+  onTab?: KeyPressHandler;
+  onTabPress?: KeyPressHandler;
+  onTabRelease?: KeyPressHandler;
+
+  onSpace?: KeyPressHandler;
+  onSpacePress?: KeyPressHandler;
+  onSpaceRelease?: KeyPressHandler;
+}
+```
+
+## State
+
+Keyboard events come in two basic flavors, `keydown` and `keyup`, which
+represent that a key has been pressed or released, respectively. In addition,
+there are handful of variants of these events, such as:
+
+- **repeat**: a `keydown` is automatically repeating.
+- **shiftKey**: the `Shift` key is active
+- **ctrlKey**: the `Ctrl` key is active
+- **altKey**: the `Alt` (`Option` or `⌥` on OS X) key is active
+- **metaKey**: the `Meta` (`Command` or `⌘` on OS X;
+  `Windows` or `⊞` on Windows) key is active
+
+These events and variants are reflected in the key handler state,
+and any of them may be handled for any key with [handlers]:
+
+```ts
+interface KeyPressState {
+  /** The event associated with the key press */
+  event: React.KeyboardEvent | KeyboardEvent | null;
+  /** A string representation of the key.  */
+  key: string | null;
+  /** Whether the key is pressed. */
+  down: boolean;
+  /** How many times the last event has repeated. */
+  repeat: number;
+  /** Whether the `Shift key is active. */
+  shiftKey: boolean;
+  /** Whether the `Ctrl` key is active */
+  ctrlKey: boolean;
+  /** Whether the `Alt` (`Option` or `⌥` on OS X) key is active */
+  altKey: boolean;
+  /** Whether the `Meta` (`Command` or `⌘` on OS X; */
+  metaKey: boolean;
+  /** Key press start time. */
+  startTime: number;
+  /** Key press elapsed time. */
+  elapsedTime: number;
+  /** Timestamp of the event. */
+  timeStamp: number;
+  /** Whether this is the first event. */
+  first: boolean;
+  /** Whether this is the last event. */
+  last: boolean;
+  /** Whether the key press is active. */
+  active: boolean;
+  /** Other active keys. */
+  chord: string[];
+}
+```
+
+## Config
+
+`useKeyPress` accepts an optional configuration
+for how to bind to keyboard events as a second argument:
+
+```ts
+const bind = useKeyPress(handler, {
+  /* options here */
+});
+```
+
+The supported options are:
+
+```ts
+interface UseKeyPressConfig {
+  /**
+   * Whether or not key presses are enabled. Useful for toggling
+   * keyboard behavior on or off.
+   *
+   * Default is `true`.
+   */
+  enabled?: boolean;
+  /**
+   * Optional config for the key event listener.
+   * These options reflect the same DOM `addEventListener` options.
+   */
+  eventOptions?: {
+    /** If `true`, keyboard events will be captured.*/
+    capture?: boolean;
+    /**
+     * If `true`, the listener should not call `preventDefault()`.
+     *
+     * Note that this will have no effect if binding to a React element,
+     * as ReactDOM events do not support passive listeners.
+     * See https://github.com/facebook/react/issues/6436
+     */
+    passive?: boolean;
+  };
+  /**
+   * An optional target element or React ref. If defined,
+   * the `bind()` function should be run as an effect,
+   * not spread as props on a React component.
+   */
+  domTarget?: EventTarget | React.RefObject<EventTarget>;
+}
+```
+
+## Bind
+
+`useKeyPress` works by listening to keyboard events to keep track of
+related sequences of keypresses (represented as [state]), and calling
+[handlers] when necessary. In order for this to work, `useKeyPress` must
+_bind_ to a source of keyboard events.
+
+### Binding to a React Element
+
+The default binding for `useKeyPress` is to any [React element]:
+
+```ts
+const bind = useKeyPress(handler, options);
+// render a React element and bind `useKeyPress` handlers to it.
+return <div {...bind()} />;
+```
+
+This works because `bind()` returns `onKeyDown` and `onKeyUp`
+[React event handlers] as props.
+
+### Binding to a DOM Element
+
+`useKeyPress` also supports adding handlers to DOM nodes directly.
+In this case, you shouldn't spread the `bind()` object as a prop,
+but use it as a render effect via `useEffect`:
+
+```ts
+const ref = React.useRef(null);
+const bind = useKeyPress(handler, {domTarget: ref});
+// Run `bind` as an effect on mount, and anytime `bind` changes.
+React.useEffect(bind, [bind]);
+return <div ref={ref} />;
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[react-spring]: https://www.react-spring.io
+[react element]: https://reactjs.org/docs/rendering-elements.html
+[react event handlers]: https://reactjs.org/docs/handling-events.html
+[config]: #config
+[handlers]: #handlers
+[named handlers]: #named-handlers
+[onkey]: #onkey
+[onkeypress]: #onkeypress
+[onkeyrelease]: #onkeyrelease
+[named key handlers]: #named-key-handlers
+[state]: #state
+[bind]: #bind
+[binding to a react element]: #binding-to-a-react-element
+[binding to a dom element]: #binding-to-a-dom-element

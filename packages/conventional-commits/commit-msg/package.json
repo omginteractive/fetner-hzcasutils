@@ -1,0 +1,28 @@
+{
+  "name": "@hzdg/commit-msg",
+  "version": "1.0.1",
+  "description": "The hzdg prepare-commit-msg git hook template",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/commit-msg"
+  },
+  "author": "Eric Eldredge <lettertwo@gmail.com>",
+  "main": "bin/commit-msg.js",
+  "bin": "bin/commit-msg.js",
+  "files": [
+    "bin",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.3",
+    "@hzdg/gitmoji": "^1.0.5",
+    "@lerna/project": "^3.0.0",
+    "yargs": "^13.2.2"
+  }
+}

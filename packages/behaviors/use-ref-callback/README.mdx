@@ -1,0 +1,114 @@
+---
+name: useRefCallback
+menu: Hooks
+route: /use-ref-callback
+---
+
+# useRefCallback
+
+A React [hook] for components that need to know when a [ref] changes.
+
+> **NOTE** If your ref will contain a DOM node,
+> you might not need this hook! React has [useLayoutEffect],
+> which is usually the right place for code that depends on a DOM ref.
+
+## What's it for?
+
+React ships with a [useRef] hook that works perfectly fine for most
+cases where a component needs a stable reference to a mutable value.
+But sometimes, a component will have state or effects that
+depend on the current value of the ref. In those cases,
+it is not enough to add the ref or it's current value
+as dependencies of the effect:
+
+```js
+const SomeComponent = () => {
+  const ref = useRef();
+  useEffect(
+    () => {
+      if (ref.current) {
+        // do something with the current ref.
+      }
+    },
+    // We might think to specify that this effect depends on the ref,
+    // but this won't work, because:
+    // 1) `ref` is stable between renders (and will never change), and
+    // 2) `ref.current` is mutable, and react won't rerender when it changes.
+    [ref, ref.current],
+  );
+  return <div ref={ref} />;
+};
+```
+
+This hook aims to address this use case by providing a [callback ref]
+that can be used instead of the standard [ref object].
+When the callback ref is called (i.e., by React after render),
+the hook will trigger a rerender of the component, giving it a chance
+to work with the updated ref value.
+
+## Installation
+
+```shell
+yarn add @hzdg/use-ref-callback
+```
+
+## Usage
+
+```js
+import useRefCallback from '@hzdg/use-ref-callback';
+
+const SomeComponent = () => {
+  // Returns a tuple of a ref object and a ref callback.
+  // An optional initial value is allowed and works just like `React.useRef`.
+  const [ref, setRef] = useRefCallback(null);
+  useEffect(
+    () => {
+      if (ref.current) {
+        // do something with the current ref.
+      }
+    },
+    // Note that `ref.current` is mutable, and react won't rerender
+    // when it changes, but unlike in the example above,
+    // this _will_ work, because we have a `setRef` callback to call
+    // whenever the ref changes, which will trigger a rerender.
+    // Note also that we can omit `ref` from the list, as `ref`
+    // is ref object (like you would get from `useRef`),
+    // and is stable between renders.
+    [ref.current],
+  );
+  // Notice we pass `setRef` rather than `ref` here.
+  // React will call `setRef` with the current value on render.
+  // If we wanted to use our ref to store something other than
+  // React elements, we could use `setRef(valueToStore)` ourselves.
+  return <div ref={setRef} />;
+};
+```
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useRefCallback` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useRefCallback`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value
+  // from calls to `setRef`.
+  const [ref, setRef] = useRefCallback(null, forwardedRef);
+  useEffect(() => {
+    if (ref.current) {
+      // do something with the current ref.
+    }
+  }, [ref.current]);
+  return <div ref={setRef} />;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[uselayouteffect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html

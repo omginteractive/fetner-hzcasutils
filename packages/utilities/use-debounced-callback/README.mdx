@@ -1,0 +1,216 @@
+---
+name: useDebouncedCallback
+menu: Hooks
+route: /use-debounced-callback
+---
+
+import DebounceVisualizer from './examples/DebounceVisualizer';
+
+# useDebouncedCallback
+
+A React [hook] for components that want to [debounce] a callback.
+
+<DebounceVisualizer />
+
+## Installation
+
+```shell
+yarn add @hzdg/use-debounced-callback
+```
+
+## Usage
+
+```js
+import useDebouncedCallback from '@hzdg/use-debounced-callback';
+```
+
+The most basic use case is to create a [memoized] callback that
+is debounced by some delay (in `ms`):
+
+```js
+function SomeComponent() {
+  const handleMouseMove = useDebouncedCallback(event => {
+    // Do something with `event`, but only after 200ms
+    // have passed since the last move event!
+  }, 200);
+  return <div onMouseMove={handleMouseMove}>hello, mouse moves!</div>;
+}
+```
+
+> **Note:** When you omit the dependency list to `useDebouncedCallback`,
+> you get a memoized callback like you would get from [useCallback]
+> with the callback as its own dependency.
+> That is, it is equivalent to `useCallback(callback, [callback])`.
+> This means that the memoized callback will change whenever the **provided**
+> callback changes. In this example, it would change on **every render**.
+
+However, often times you will want to affect some state or otherwise
+incorporate some dependencies in your callback, in which case you can
+provide a dependency array (just like [useCallback]):
+
+```js
+function SomeComponent() {
+  const [state, setState] = useState(/*...*/);
+  const handleMouseMove = useDebouncedCallback(
+    event => {
+      // Do something with `event` and `state`,
+      // but only after 200ms have passed since the last move event!
+    },
+    200,
+    [state],
+  );
+  return <div onMouseMove={handleMouseMove}>hello, mouse moves!</div>;
+}
+```
+
+> **Note:** With a dependency array provided, the memoized callback will
+> only change when the dependencies change (like [useCallback]), **or**
+> the debounce config changes. In this example, the memoized callback
+> will only change if the timeout is changed (to a value different from `200`),
+> or if `state` changes.
+
+## Options
+
+The `useDebouncedCallback` API is directly inspired by [lodash debounce],
+which means it supports a number of [options] that can modify the behavior
+of the debounced callback.
+
+```ts
+type UseDebouncedCallbackOptions =
+  | number
+  | {
+      wait?: number;
+      maxWait?: number;
+      leading?: boolean;
+      trailing?: boolean;
+    };
+```
+
+`useDebouncedCallback` supports a numeric timeout option, or an options object.
+If an object is provided, the [wait] option is equivalent to a numeric timeout:
+
+```js
+// These are the equivalent configurations.
+useDebouncedCallback(() => {}, 200, []);
+useDebouncedCallback(() => {}, {wait: 200}, []);
+```
+
+In addition to [wait], there are also [maxWait], [leading],
+and [trailing] options.
+
+### Wait
+
+Defaults to `0`.
+
+The amount of time (in ms) to wait
+before allowing the callback to be invoked.
+
+### MaxWait
+
+Optional.
+
+The maximum amount of time (in ms) to wait
+before allowing the callback to be invoked.
+
+### Leading
+
+Defaults to `false`.
+
+Invoke the callback before debouncing.
+
+If `false` while [wait] is `0`, behaves similarly
+to calling the callback with `setTimeout(callback, 0)`.
+
+### Trailing
+
+Defaults to `true`.
+
+Invoke the callback after debouncing.
+
+If `true` while [leading] is `true`, the trailing invocation
+is only scheduled if the callback is called more than once
+while invocation is debounced.
+
+## Imperative Methods
+
+`useDebouncedCallback` returns a memoized function that includes [cancel] and
+[flush] 'escape hatch' methods for managing debounced invocation lifecycles:
+
+```ts
+interface Debounced<T extends (...args: any[]) => any> {
+  (...args: Parameters<T>): ReturnType<T> | undefined;
+  /** Cancel the next scheduled invocation of the callback. */
+  cancel(): void;
+  /** Force the next invocation of the callback to occur immediately. */
+  flush(): void;
+}
+```
+
+### Cancel
+
+The `cancel` method will prevent a scheduled invocation of the
+underlying callback from ocurring:
+
+```tsx
+function SomeComponent() {
+  const handleMouseMove = useDebouncedCallback(
+    event => {
+      // We do something with event here after 200ms of no mouse moves.
+    },
+    200,
+    [],
+  );
+
+  useEffect(
+    () => () => {
+      // But we want to cancel handling a pending mouse move
+      // when our component has unmounted.
+      handleMouseMove.cancel();
+    },
+    [handleMouseMove],
+  );
+
+  return <div onMouseMove={handleMouseMove}>...</div>;
+}
+```
+
+> **Note:** If there is no debounced invocation scheduled, `cancel()` is a no-op.
+
+### Flush
+
+The `flush` method will _immediately_ invoke a scheduled invocation of
+the underlying callback:
+
+```tsx
+function SomeComponent() {
+  const handleMouseMove = useDebouncedCallback(
+    event => {
+      // We do something with event here after 200ms of no mouse moves.
+    },
+    200,
+    [],
+  );
+
+  useEffect(() => {
+    // But we also handle a pending mouse move as an effect of rerendering.
+    handleMouseMove.flush();
+  });
+
+  return <div onMouseMove={handleMouseMove}>...</div>;
+}
+```
+
+> **Note:** If there is no debounced invocation scheduled, `flush()` is a no-op.
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[memoized]: https://en.wikipedia.org/wiki/Memoization
+[usecallback]: https://reactjs.org/docs/hooks-reference.html#usecallback
+[debounce]: https://css-tricks.com/debouncing-throttling-explained-examples/#article-header-id-0
+[lodash debounce]: https://lodash.com/docs/4.17.15#debounce
+[options]: #options
+[wait]: #wait
+[maxwait]: #maxwait
+[leading]: #leading
+[trailing]: #trailing
+[cancel]: #cancel
+[flush]: #flush

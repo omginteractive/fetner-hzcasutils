@@ -1,0 +1,204 @@
+---
+name: useThrottledCallback
+menu: Hooks
+route: /use-throttled-callback
+---
+
+import ThrottleVisualizer from './examples/ThrottleVisualizer';
+
+# useThrottledCallback
+
+A React [hook] for components that want to [throttle] a callback.
+
+<ThrottleVisualizer />
+
+## Installation
+
+```shell
+yarn add @hzdg/use-throttled-callback
+```
+
+## Usage
+
+```js
+import useThrottledCallback from '@hzdg/use-throttled-callback';
+```
+
+The most basic use case is to create a [memoized] callback that
+is throttled by some rate (in `ms`):
+
+```js
+function SomeComponent() {
+  const handleMouseMove = useThrottledCallback(event => {
+    // Do something with `event`, but at most every 200ms!
+  }, 200);
+  return <div onMouseMove={handleMouseMove}>hello, mouse moves!</div>;
+}
+```
+
+> **Note:** When you omit the dependency list to `useThrottledCallback`,
+> you get a memoized callback like you would get from [useCallback]
+> with the callback as its own dependency.
+> That is, it is equivalent to `useCallback(callback, [callback])`.
+> This means that the memoized callback will change whenever the **provided**
+> callback changes. In this example, it would change on **every render**.
+
+However, often times you will want to affect some state or otherwise
+incorporate some dependencies in your callback, in which case you can
+provide a dependency array (just like [useCallback]):
+
+```js
+function SomeComponent() {
+  const [state, setState] = useState(/*...*/);
+  const handleMouseMove = useThrottledCallback(
+    event => {
+      // Do something with `event` and `state`, but at most every 200ms!
+    },
+    200,
+    [state],
+  );
+  return <div onMouseMove={handleMouseMove}>hello, mouse moves!</div>;
+}
+```
+
+> **Note:** With a dependency array provided, the memoized callback will
+> only change when the dependencies change (like [useCallback]), **or**
+> the throttle config changes. In this example, the memoized callback
+> will only change if the timeout is changed (to a value different from `200`),
+> or if `state` changes.
+
+## Options
+
+The `useThrottledCallback` API is directly inspired by [lodash throttle],
+which means it supports a number of [options] that can modify the behavior
+of the throttled callback.
+
+```ts
+type UseThrottledCallbackOptions =
+  | number
+  | {
+      wait?: number;
+      leading?: boolean;
+      trailing?: boolean;
+    };
+```
+
+`useThrottledCallback` supports a numeric timeout option, or an options object.
+If an object is provided, the [wait] option is equivalent to a numeric timeout:
+
+```js
+// These are the equivalent configurations.
+useThrottledCallback(() => {}, 200, []);
+useThrottledCallback(() => {}, {wait: 200}, []);
+```
+
+In addition to [wait], there are also [leading] and [trailing] options.
+
+### Wait
+
+Defaults to `0`.
+
+The amount of time (in ms) to wait before invoking the callback again.
+
+### Leading
+
+Defaults to `true`.
+
+Invoke the callback before throttling.
+
+If `false` while [wait] is `0`, behaves similarly
+to calling the callback with `setTimeout(callback, 0)`.
+
+### Trailing
+
+Defaults to `true`.
+
+Invoke the callback after throttling.
+
+If `true` while [leading] is `true`, the trailing invocation
+is only scheduled if the callback is called more than once
+while invocation is throttled.
+
+## Imperative Methods
+
+`useThrottledCallback` returns a memoized function that includes [cancel] and
+[flush] 'escape hatch' methods for managing throttled invocation lifecycles:
+
+```ts
+interface Throttled<T extends (...args: any[]) => any> {
+  (...args: Parameters<T>): ReturnType<T> | undefined;
+  /** Cancel the next scheduled invocation of the callback. */
+  cancel(): void;
+  /** Force the next invocation of the callback to occur immediately. */
+  flush(): void;
+}
+```
+
+### Cancel
+
+The `cancel` method will prevent a scheduled invocation of the
+underlying callback from ocurring:
+
+```tsx
+function SomeComponent() {
+  const handleMouseMove = useThrottledCallback(
+    event => {
+      // We do something with event at most every 200ms.
+    },
+    200,
+    [],
+  );
+
+  useEffect(
+    () => () => {
+      // But we want to cancel handling a pending mouse move
+      // when our component has unmounted.
+      handleMouseMove.cancel();
+    },
+    [handleMouseMove],
+  );
+
+  return <div onMouseMove={handleMouseMove}>...</div>;
+}
+```
+
+> **Note:** If there is no throttled invocation scheduled, `cancel()` is a no-op.
+
+### Flush
+
+The `flush` method will _immediately_ invoke a scheduled invocation of
+the underlying callback:
+
+```tsx
+function SomeComponent() {
+  const handleMouseMove = useThrottledCallback(
+    event => {
+      // We do something with event here at most every 200ms.
+    },
+    200,
+    [],
+  );
+
+  useEffect(() => {
+    // But we also handle a pending mouse move as an effect of rerendering.
+    handleMouseMove.flush();
+  });
+
+  return <div onMouseMove={handleMouseMove}>...</div>;
+}
+```
+
+> **Note:** If there is no throttle invocation scheduled, `flush()` is a no-op.
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[memoized]: https://en.wikipedia.org/wiki/Memoization
+[usecallback]: https://reactjs.org/docs/hooks-reference.html#usecallback
+[throttle]: https://css-tricks.com/debouncing-throttling-explained-examples/#article-header-id-2
+[lodash throttle]: https://lodash.com/docs/4.17.15#throttle
+[options]: #options
+[wait]: #wait
+[maxwait]: #maxwait
+[leading]: #leading
+[trailing]: #trailing
+[cancel]: #cancel
+[flush]: #flush

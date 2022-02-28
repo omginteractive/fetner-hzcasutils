@@ -1,0 +1,141 @@
+---
+name: domUtils
+menu: Utilities
+route: /dom-utils
+---
+
+# DOM Utils
+
+Helpers for interacting with the DOM.
+
+These are mostly used in other hzcore packages, but they are published
+for convenience and for easy maintenance and upgrading across hzcore.
+
+Who knows, maybe some of them might be directly useful in an application, too?
+
+## Installation
+
+```shell
+yarn add @hzdg/dom-utils
+```
+
+## ensureDOMInstance
+
+When given a DOM node instance and an optional DOM class (for example, [Node]),
+asserts that the given node is an instance of the DOM class. If no DOM class
+is given, asserts that the given node is an instance of `Node`.
+
+If the node is not an instance of the class, `ensureDOMInstance`
+throws an [invariant].
+
+### Arguments
+
+```ts
+function ensureDOMInstance<T extends Node>(
+  node: T,
+  type: Function = Node,
+): void;
+```
+
+### Usage
+
+```js
+import {ensureDOMInstance} from '@hzdg/dom-utils';
+
+const div = document.createElement('div');
+
+ensureDOMInstance(div); // no error
+ensureDOMInstance(div, Node); // no error
+ensureDOMInstance(div, HTMLDivElement); // no error
+ensureDOMInstance(div, HTMLAnchorElement); // error!
+```
+
+### Motivation
+
+It is simple enough to acheive what this helper does with something like:
+
+```js
+invariant(node instanceof Node, 'Expected a Node!');
+```
+
+However, there are cases where this might fail unexpectedly.
+For example:
+
+```js
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+const node = iframe.contentDocument.createElement('div');
+// This errors because document.Node is not the
+// same function as iframe.contentDocument.Node!
+invariant(node instanceof Node, 'Expected a Node!'); // error!
+```
+
+This helper accounts for this case by using a class on the given DOM node's
+containing document with a matching name to the given DOM class.
+
+## getDocument
+
+Returns a [Document], or `null`.
+
+If passed a DOM node instance, returns the root document for that node,
+rather than the global Document. This is useful for nodes that might
+belong to iframes, where `getDocument` will return the [content document].
+
+### Arguments
+
+```ts
+function getDocument(node?: Node | null): Document | null;
+```
+
+### Usage
+
+```js
+import {getDocument} from '@hzdg/dom-utils';
+
+const globalDocument = getDocument(); // Same as `document`
+
+const div = document.createElement('div');
+const divDocument = getDocument(div); // Same as `document`
+
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+const iframeDiv = iframe.contentDocument.createElement('div');
+const iframeDocument = getDocument(iframeDiv); // Same as `iframe.contentDocument`
+```
+
+## getWindow
+
+Returns a [Window], or `null`.
+
+If passed a DOM node instance, returns the containing document's [default view].
+rather than the global window. This is useful for nodes that might
+belong to iframes.
+
+### Arguments
+
+```ts
+function getWindow(node?: Node | null): Window | null;
+```
+
+### Usage
+
+```js
+import {getWindow} from '@hzdg/dom-utils';
+
+const globalWindow = getWindow(); // Same as `window`
+
+const div = document.createElement('div');
+const divWindow = getWindow(div); // Same as `window`
+
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+const iframeDiv = iframe.contentDocument.createElement('div');
+const iframeWindow = getWindow(iframeDiv); // Same as `iframe.contentWindow`
+```
+
+[node]: https://developer.mozilla.org/en-US/docs/Web/API/Node
+[invariant]: https://github.com/zertosh/invariant#readme
+[document]: https://developer.mozilla.org/en-US/docs/Web/API/Document
+[content document]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/contentDocument
+[window]: https://developer.mozilla.org/en-US/docs/Web/API/Window
+[default view]: https://developer.mozilla.org/en-US/docs/Web/API/Document/defaultView

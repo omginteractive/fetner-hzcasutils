@@ -1,0 +1,262 @@
+---
+name: ScrollMonitor
+menu: Headless Components
+route: /scroll-monitor
+---
+
+import {Playground, Props} from 'docz';
+import ScrollMonitor from './src';
+
+# ScrollMonitor
+
+A React [component] for monitoring and interacting with scroll position.
+
+`ScrollMonitor` is a [headless component], meaning
+it accepts a child [render prop], and returns the result
+of calling that render prop with the latest state of
+the nearest scrollable container.
+
+> **Deprecated**
+>
+> It is generally better to use the [hooks]
+> that provide the specific aspects of scrolling you would like to
+> monitor, rather than use this component. To read more about them, see:
+>
+> | use hook                | for ScrollMonitor prop |
+> | ----------------------- | ---------------------- |
+> | [useScrollDirection]    | direction              |
+> | [useScrollIntersection] | intersects             |
+> | [useScrollPosition]     | position               |
+> | [useScrolling]          | scrolling              |
+
+## Installation
+
+```shell
+yarn add @hzdg/scroll-monitor
+```
+
+## Usage
+
+```
+import ScrollMonitor from '@hzdg/scroll-monitor';
+```
+
+## Example
+
+<Playground>
+  <ScrollMonitor scrolling direction position>
+    {state => (
+      <pre ref={state.scrollRef} style={{width: '100%', height: 250}}>
+        {JSON.stringify(
+          Object.assign({}, state, {scrollRef: undefined}),
+          null,
+          2,
+        )}
+      </pre>
+    )}
+  </ScrollMonitor>
+</Playground>
+
+## Props
+
+### children
+
+```ts
+children: (state: ScrollMonitorRenderProps) => JSX.Element;
+```
+
+A function that takes [scroll state] and returns a React element.
+Also known as a 'render prop'.
+
+### innerRef
+
+```ts
+innerRef?: React.Ref<HTMLElement> | null;
+```
+
+An optional [ref object] or [callback ref].
+Useful when the owner component needs to handle ref forwarding.
+
+### direction
+
+```ts
+direction?: boolean | null;
+```
+
+Whether or not to monitor scroll direction.
+
+If `true`, then [scroll state] will have a `direction` value
+like `{vertical: 'down', horizontal: 'right'}`.
+
+### position
+
+```ts
+position?: boolean | null;
+```
+
+Whether or not to monitor scroll position.
+
+If `true`, then [scroll state] will have a `position` value
+like `{top: 10, left: 10}`.
+
+### scrolling
+
+```ts
+scrolling?: boolean | null;
+```
+
+Whether or not to monitor scrolling state.
+
+if `true`, then [scroll state] will have a boolean `scrolling` value
+where `true` means scrolling is happening.
+
+### intersects
+
+```ts
+intersects?: ScrollIntersectionConfig | null;
+```
+
+One area, or array of areas, of the form
+`{top?: number, right?: number, bottom?: number, left?: number}`
+within a scrollable area to monitor for intersection with scroll position.
+
+If defined, then [scroll state] will have an `intersects` value
+like `true` or `[true, false]`, depending on if the config defines
+a single area an array of areas. The value indicates whether or not
+scroll position currently intersects with the defined area.
+
+### onStart
+
+```ts
+onStart?: (() => void) | null;
+```
+
+A callback for when scrolling starts.
+
+### onChange
+
+```ts
+onChange?: ((state: ScrollMonitorRenderProps) => void) | null;
+```
+
+A callback for when scroll position changes.
+Receives the latest [scroll state], in the same form as the render prop.
+
+### onEnd
+
+```ts
+onEnd?: (() => void) | null;
+```
+
+A callback for when scrolling stops.
+
+## Render Props
+
+A Scroll state object passed to the ScrollMonitor render prop (children function).
+
+In usage as follows:
+
+```js
+<ScrollMonitor {...props}>
+  {(state) => (...)}
+</ScrollMonitor>
+```
+
+The value of `state` will include some or all of the following:
+
+### state.scrollRef
+
+```ts
+ scrollRef: (instance: HTMLElement | null) => void;
+```
+
+A [callback ref] that should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `ScrollMonitor` will traverse the DOM to find a scrollable parent
+to observe.
+
+### state.scrolling
+
+```ts
+ scrolling?: boolean;
+```
+
+Whether or not the nearest scrollable container is currently scrolling.
+
+Only set if the [scrolling](#scrolling) prop is `true`,
+or if any of the [onStart](#onstart), [onChange](#onchange), or [onEnd](#onend)
+callbacks are defined.
+
+### state.position
+
+```ts
+ position?: ScrollPosition;
+```
+
+The current position of the nearest scrollable container.
+
+Only set if the [position](#position) prop is `true`,
+or if the [onChange](#onchange) callback is defined.
+
+### state.direction
+
+```ts
+ direction?: ScrollDirection;
+```
+
+The latest vertical and horizontal direction of scroll
+in the nearest scrollable container.
+
+Only set if the [direction](#direction) prop is `true`.
+
+### state.intersects
+
+```ts
+ intersects?: Intersects;
+```
+
+Whether or not the latest position of the nearest scrollable container
+intersects with one or more defined areas.
+
+Only set if the [intersects](#intersects) prop
+is given a defined area, or array of areas, of the form
+`{top?: number, right?: number, bottom?: number, left?: number}`.
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `ScrollMonitor` accepts an optional `innerRef` prop:
+
+```js
+const RefForwardingScrollMonitor = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `ScrollMonitor`. Note that the returned `scrollRef` render prop
+  // will _not_ be the same as `forwardedRef`, but they _will_ get
+  // the same value.
+  return (
+    <ScrollMonitor {...props} innerRef={forwardedRef}>
+      {/*
+        Note that we actually pass `scrollRef` to the underlying component,
+        not `forwardedRef`. We do this to make sure that
+        `ScrollMonitor` is notified when the ref value changes.
+        This works because we passed `forwardedRef` to `ScrollMonitor`,
+        which will update the `forwardedRef` automatically.
+      */}
+      {({scrollRef, ...state}) => <div ref={scrollRef}>{/* ... */}</div>}
+    </ScrollMonitor>
+  );
+});
+```
+
+[component]: https://reactjs.org/docs/components-and-props.html
+[hooks]: https://reactjs.org/docs/hooks-intro.html
+[headless component]: https://medium.com/merrickchristensen/headless-user-interface-components-565b0c0f2e18
+[render prop]: https://cdb.reacttraining.com/use-a-render-prop-50de598f11ce
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usescrolldirection]: /use-scroll-direction
+[usescrollintersection]: /use-scroll-intersection
+[usescrollposition]: /use-scroll-position
+[usescrolling]: /use-scrolling
+[scroll state]: #render-props

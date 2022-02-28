@@ -1,0 +1,10 @@
+/* Regular CSS Stylesheet */
+.RedButton__base {
+  border: 3px solid red;
+}
+
+
+/* CSS Modules */
+:local(.buttonBase) {
+  border: 3px solid green;
+}

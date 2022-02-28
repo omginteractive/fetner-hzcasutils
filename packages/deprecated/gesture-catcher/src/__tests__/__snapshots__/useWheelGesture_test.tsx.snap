@@ -1,0 +1,254 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useWheelGesture passes gesture states to a handler 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -41,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -41,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture passes gesture states to a handler 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -46,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 2,
+  "xVelocity": -5,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture passes gesture states to a handler 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -49,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 3,
+  "xVelocity": -3,
+  "y": 0,
+  "yDelta": -5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 1,
+  "yVelocity": -5,
+}
+`;
+
+exports[`useWheelGesture passes gesture states to a handler 4`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": -49,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 3,
+  "xVelocity": -3,
+  "y": 0,
+  "yDelta": -5,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 1,
+  "yVelocity": -5,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: no config 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -41,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -41,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: no config 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -42,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 2,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: no config 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": -42,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 2,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: threshold 10 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: threshold 10 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": -1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture uses an existing ref 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": -45,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 1,
+  "yVelocity": -45,
+}
+`;
+
+exports[`useWheelGesture uses an existing ref 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": -45,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 1,
+  "yVelocity": -45,
+}
+`;

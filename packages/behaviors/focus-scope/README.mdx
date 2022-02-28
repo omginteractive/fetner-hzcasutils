@@ -1,0 +1,780 @@
+---
+name: FocusScope
+menu: Headless Components
+route: /focus-scope
+---
+
+import {Fragment, useState, useContext} from 'react';
+import {Playground, Props} from 'docz';
+import {FocusScope} from './src';
+import FocusScopeExample, {
+  Activate,
+  Deactivate,
+} from './examples/FocusScopeExample';
+
+# FocusScope
+
+A React [component] for managing focus.
+
+## Motivation
+
+As a platform, the web is woefully underspecified when it comes to many common
+UI patterns. In the sense that there is a platform to use, it's not possible
+to simply "use the platform" for sufficiently complex UIs (which includes
+_most_ UIs). The extent of this problem is well illustrated by perusing the
+W3C guide for WAI-ARIA [Authoring Practices].
+
+There is an _overwhelming_ amount of detail and consideration that
+goes into building the UI components outlined in that document,
+which is made even more daunting when considering just how _often_
+at least one of these components is designed for!
+
+That's a lot of talk to say that building UIs for the web is _hard_.
+`FocusScope` is a component designed to simplify one basic,
+but far-reaching and complex aspect of building web UIs: **managing focus**.
+
+Some of the common use cases that `FocusScope` can help with include:
+
+- [trapping focus]
+- [focusing automatically]
+- [restoring focus]
+- [managing focus with events]
+- [nesting focus scopes]
+
+`FocusScope` is also designed for any general-purpose focus management
+when used [as a headless component].
+
+## Installation
+
+```shell
+yarn add @hzdg/focus-scope
+```
+
+## Usage
+
+```js
+import FocusScope from '@hzdg/focus-scope';
+```
+
+`FocusScope` can be used in two ways; [as a container], or [as a headless component].
+
+### As a Container
+
+The most straightfoward way to use `FocusScope` is as a container for one or
+more other elements:
+
+```jsx
+const SomeComponent = () => (
+  <FocusScope>
+    <input {...} />
+    <button {...} />
+  </FocusScope>
+)
+```
+
+In the above example, `FocusScope` renders a `<span>` element,
+and renders its children as children of the span.
+
+The container element can be configured by setting the `as` prop:
+
+```jsx
+const SomeComponent = () => (
+  <FocusScope as="form">
+    <input {...} />
+    <button {...} />
+  </FocusScope>
+)
+```
+
+The `as` prop is not limited to intrinsic [ReactDOM] elements like `span`
+or `form`, though. Any [ref-forwarding component] may be used:
+
+```jsx
+const SomeRefForwardingComponent = React.forwardRef(
+  ({someAdditionalProp, children}, forwardedRef) => (
+    <div ref={forwardedRef}>
+      <span>{someAdditionalProp}<span>
+      {children}
+    </div>
+  )
+);
+const SomeComponent = () => (
+  <FocusScope as={SomeRefForwardingComponent} someAdditionalProp="foo">
+    <input {...} />
+    <button {...} />
+  </FocusScope>
+)
+```
+
+In the above example, `FocusScope` renders `SomeRefForwardingComponent`
+with its children and any additional props.
+
+A common use case for the `as` prop is with a [styled component]:
+
+```jsx
+const StyledForm = styled.form`
+  background: hotpink;
+`;
+const SomeComponent = () => (
+  <FocusScope as={StyledForm}>
+    <input {...} />
+    <button {...} />
+  </FocusScope>
+)
+```
+
+> Note that `FocusScope` passes a [ref] to `SomeRefForwardingComponent`,
+> which is why the `as` element type must be a [ReactDOM] element type or
+> [ref-forwarding component].
+
+### As a Headless Component
+
+Out of the box, `FocusScope` comes with some nice in-built behaviors
+and abilities, like trapping focus, reacting to focus and blur changes,
+or handling keyboard inputs. Sometimes, though, a UI has more specific
+focus-bound behaviors that require more precise control.
+
+`FocusScope` may be used as a [headless component] when implementing
+more low-level focus-bound behaviors by passing a **function as children**,
+otherwise known as a [render prop]:
+
+```jsx
+const SomeComponent = () => (
+  // Note that features that depend on bindings to a DOM element,
+  // like `trap`, or focus and keyboard bindings, won't work
+  // when using the render prop. However, features that work
+  // independently of a particular DOM element,
+  // like `autoFocus` and `restoreFocus`, will.
+  <FocusScope id="someid" autoFocus restoreFocus>
+    {({ref, focusManager}) => {
+      // Specific focus-bound behaviors can be implemented
+      // using the provided `focusManager`.
+      // Be sure to forward the provided `ref` to a DOM element!
+      return (
+        <form ref={ref}>
+          <input {...} />
+          <button {...} />
+        </form>
+      )
+    }}
+    </FocusScope>
+);
+```
+
+The render prop receives a `ref` callback which **must be** passed as a ref
+to a [ReactDOM] element. It also receives the [FocusManager] instance
+for this `FocusScope`. It is expected to return a valid React Node,
+just like any function component:
+
+```typescript
+(props: {ref: (element: Element) => void; focusManager: FocusManager}) =>
+  JSX.Element;
+```
+
+> Using `FocusScope` in a headless manner comes with some important caveats:
+>
+> - Your [render prop] function will be passed an object parameter that includes
+>   a `ref` callback. This ref should be forwarded to a ReactDOM element.
+> - Behaviors of `FocusScope` that depend on binding to a DOM element
+>   **will not work**, namely:
+>   - Trapping focus via the [trap] prop
+>   - Handling focus events via the [onFocus] prop
+>   - Handling blur events via the [onBlur] prop
+>   - Handling keyboard events via the [onKeyPress] prop
+>
+> These behaviors (or any other focus-bound behaviors) can be implemented
+> by the render prop component via the provided `FocusManager` instance.
+>
+> However, features of `FocusScope` that don't require binding to DOM element,
+> such as [autoFocus] and [restoreFocus], will still work.
+
+## Props
+
+### id
+
+```typescript
+id?: string | null;
+```
+
+An optional string to identify the [FocusManager] for this `FocusScope`.
+
+Note that ids must be unique per focus tree.
+
+### as
+
+```typescript
+as?: React.ElementType;
+```
+
+The React element type to render. Defaults to `'span'`.
+If the provided value is not a [ReactDOM] component,
+it should forward the provided ref to an underlying
+component.
+See https://reactjs.org/docs/forwarding-refs.html
+
+### trap
+
+```typescript
+trap?: boolean;
+```
+
+Whether or not to 'trap' focus within this `FocusScope`.
+
+If `true`, then once focus is within this scope, it will be retained,
+even when a blur occurs. Additionally, changing focus (i.e.,
+via tab key press) will cycle through the focusable elements
+within this scope.
+
+Defaults to `false`.
+
+For more, see [Trapping Focus].
+
+### autoFocus
+
+```typescript
+autoFocus?: boolean;
+```
+
+Whether or not to focus on the first focusable element
+in this scope when this `FocusScope` mounts.
+
+If this is toggled to `true` after mount, it will have no effect.
+
+Defaults to `false`.
+
+For more, see [Focusing Automatically].
+
+### restoreFocus
+
+```typescript
+restoreFocus?: boolean;
+```
+
+Whether or not to restore focus to the previously focused element
+when this `FocusScope` unmounts.
+
+Defaults to `false`.
+
+For more, see [Restoring Focus].
+
+### onFocus
+
+```typescript
+onFocus?: (event: FocusEvent, focusManager: FocusManager) => void;
+```
+
+Optional handler for when focus enters this scope.
+
+Receives the `FocusEvent` and the associated `FocusManager` instance
+for the enclosing `FocusScope`, which is useful for manually updating
+focus in response to the event.
+
+### onBlur
+
+```typescript
+onBlur?: (event: FocusEvent, focusManager: FocusManager) => void;
+```
+
+Optional handler for when focus leaves this scope.
+
+Receives the `FocusEvent` and the associated `FocusManager` instance
+for the enclosing `FocusScope`, which is useful for manually updating
+focus in response to the event.
+
+### onKeyPress
+
+```typescript
+onKeyPress?: (event: KeyboardEvent, focusManager: FocusManager) => void;
+```
+
+Optional handler for when _any_ keypress occurs within scope.
+
+Receives the `KeyboardEvent` and the associated `FocusManager` instance
+for the enclosing `FocusScope`, which is useful for manually updating
+focus in response to the event.
+
+For more, see [Managing Focus with Events].
+
+## FocusManager
+
+The `FocusManager` is both a utility for managing focus within a `FocusScope`
+and a data structure for representing focus hierarchy.
+
+`FocusScope` works by creating a hierarchy of `FocusManager` instances that
+correspond to the relationship of `FocusScope` nodes in the React element tree.
+This means that every `FocusScope` has a corresponding `FocusManager` instance,
+and if a `FocusScope` is a descendant of another `FocusScope`, then its
+`FocusManager` instance will be a child of the other's `FocusManager`.
+
+There are two basic ways to get access to the `FocusManager` instance:
+
+- The instance is passed to the callback props [onFocus], [onBlur],
+  and [onKeyPress].
+- The instance is passed to the render prop function when `FocusScope`
+  is used [as a headless component].
+
+The `FocusManager` instance exposes the the following properties and methods:
+
+### id
+
+```typescript
+get id(): string | null;
+```
+
+An optional string id for the `FocusManager`. This value
+corresponds to the `id` prop passed to the matching `FocusScope`.
+
+Useful for being able to find this `FocusManager` via [findManagerById].
+
+### root
+
+```typescript
+get root(): FocusManager;
+```
+
+The root `FocusManager` that this `FocusManager` is a descendant of.
+
+Note that the root `FocusManager` will be for the document,
+even though no `FocusScope` is explicitly created for the document.
+
+### parent
+
+```typescript
+get parent(): FocusManager | null;
+```
+
+The parent `FocusManager` that this `FocusManager` is a child of.
+
+### getChildManagers
+
+```typescript
+getChildManagers(): FocusManager[];
+```
+
+Get an array of child `FocusManager` instances.
+
+### hasChildManagers
+
+```typescript
+hasChildManagers(): boolean;
+```
+
+Whether this `FocusManager` has at least one child `FocusManager`.
+
+### findClosestManager
+
+```typescript
+findClosestManager(
+  /**
+    * An element that may be a descendant of this `FocusManager` element,
+    * or of descendant `FocusManager` elements.
+    */
+  element: Element,
+): FocusManager | null;
+```
+
+Traverse _up_ the DOM tree, starting at the given element.
+For each visited DOM element, traverse the `FocusManager` hierarchy
+to find a `FocusManager` for the visited DOM element.
+
+Returns the `FocusManager` for the ancestor DOM element
+_closest_ to the given element, or `null`.
+
+### findManager
+
+```typescript
+findManager(
+  /**
+    * An element that might correspond to this `FocusManager`
+    * or a descendant `FocusManager`.
+    */
+  element: Element,
+): FocusManager | null;
+```
+
+Traverse the `FocusManager` hierarchy to find
+a descendant `FocusManager` for the given `element`, or `null`.
+
+### findManagerById
+
+```typescript
+findManagerById(
+  /**
+    * An id that might correspond to this `FocusManager`
+    * or a descendant `FocusManager`.
+    */
+  id: string,
+): FocusManager | null;
+```
+
+Traverse the `FocusManager` hierarchy to find
+a `FocusManager` for the given `id`.
+
+If no `FocusManager` is found, then traverse again from the root.
+
+If no `FocusManager` is found after traversing from the root,
+`null` is returned.
+
+### getFocusedElementGlobal
+
+```typescript
+getFocusedElementGlobal(): Element | null;
+```
+
+Get the currently focused element,
+even if it is outside of the scope of this `FocusManager`.
+
+### getFocusedElement
+
+```typescript
+getFocusedElement(
+  /**
+    * If true, then an element in a nested scope
+    * will also be considered in this scope.
+    */
+  includeNested?: boolean,
+): Element | null;
+```
+
+Get the focused element in the `FocusManager` scope, or `null`.
+
+An element is in scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- not a descendant of any nested `FocusManager` element
+  _or_ `includeNested` is `true`
+
+### containsFocusableElements
+
+```typescript
+containsFocusableElements(
+  /**
+    * If true, then an element in a nested scope
+    * will also be considered in this scope.
+    */
+  includeNested?: boolean,
+  /** If `true`, check for _tabbable_ elements instead. */
+  tabbable?: boolean,
+): boolean;
+```
+
+Check whether this `FocusManager` has _any_ focusable elements
+within its scope.
+
+An element is in scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- not a descendant of any nested `FocusManager` element
+  _or_ `includeNested` is `true`
+
+### containsFocusableElement
+
+```typescript
+containsFocusableElement(
+  /** An element that may be in this `FocusManager` scope. */
+  element: Element,
+  /**
+    * If `true`, then an element in a nested scope
+    * will also be considered in this scope.
+    */
+  includeNested?: boolean,
+  /** If `true`, check that the element is in scope _and tabbable_. */
+  tabbable?: boolean,
+): boolean;
+```
+
+Check whether this `FocusManager` has the given element within its scope.
+
+An element is in scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- not a descendant of any nested `FocusManager` element
+  _or_ `includeNested` is `true`
+
+### focusFirst
+
+```typescript
+focusFirst(
+  /**
+   * Either an optional boolean indicating whether to focus
+   * the first _tabbable_ element instead, or an optional object
+   * for controlling aspects of the focusing process.
+   */
+  tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
+): Element | null;
+```
+
+Focus the first focusable element in the _deep_ `FocusManager` scope,
+or if `tabbable` is `true`, the first tabbable element in the scope.
+
+Accepts either a `tabbable` boolean, or a [focus options] object
+that may include a `tabbable` boolean field. See [focus] for
+more on focus options.
+
+An element is in the _deep_ scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- a descendant of any nested `FocusManager` element.
+
+### focusLast
+
+```typescript
+focusLast(
+  /**
+   * Either an optional boolean indicating whether to focus
+   * the last _tabbable_ element instead, or an optional object
+   * for controlling aspects of the focusing process.
+   */
+  tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
+): Element | null;
+```
+
+Focus the last focusable element in the _deep_ `FocusManager` scope,
+or if `tabbable` is `true`, the last tabbable element in the scope.
+
+Accepts either a `tabbable` boolean, or a [focus options] object
+that may include a `tabbable` boolean field. See [focus] for
+more on focus options.
+
+An element is in the _deep_ scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- a descendant of any nested `FocusManager` element.
+
+### focus
+
+```typescript
+focus(
+  /** The element to focus. */
+  target: Element,
+  /** Optional options for controlling aspects of the focusing process. */
+  options?: FocusOptions,
+): Element | null;
+```
+
+Focus the given element if it is focusable. Accepts optional [focus options]
+that match the options accepted by the DOM `HTMLElement.focus` method.
+
+### focusPrevious
+
+```typescript
+focusPrevious(
+  /**
+   * Either an optional boolean indicating whether to focus
+   * the previous _tabbable_ element instead, or an optional object
+   * for controlling aspects of the focusing process.
+   */
+  tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
+): Element | null;
+```
+
+Focus the previous focusable element relative to
+the currently focused element in the _deep_ `FocusManager` scope,
+or if `tabbable` is `true`, the previous tabbable element
+relative to the currently focused element in scope.
+
+Accepts either a `tabbable` boolean, or a [focus options] object
+that may include a `tabbable` boolean field. See [focus] for
+more on focus options.
+
+An element is in the _deep_ scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- a descendant of any nested `FocusManager` element.
+
+### focusNext
+
+```typescript
+focusNext(
+  /**
+   * Either an optional boolean indicating whether to focus
+   * the next _tabbable_ element instead, or an optional object
+   * for controlling aspects of the focusing process.
+   */
+  tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
+): Element | null;
+```
+
+Focus the next focusable element relative to
+the currently focused element in the _deep_ `FocusManager` scope,
+or if `tabbable` is `true`, the next tabbable element
+relative to the currently focused element in scope.
+
+Accepts either a `tabbable` boolean, or a [focus options] object
+that may include a `tabbable` boolean field. See [focus] for
+more on focus options.
+
+An element is in the _deep_ scope if it is:
+
+- focusable
+- a descendant of the `FocusManager` element
+- a descendant of any nested `FocusManager` element.
+
+## Trapping Focus
+
+In many UI patterns, it is necessary to carefully implement keyboard
+navigation and focus management to maintain acceptable levels of usability
+and accessibility. One common example is the [Modal]. This type of UI pattern
+is so common that there is a name for the implementation: the _focus trap_.
+
+The focus trap:
+
+- manages keyboard navigation that occurs when focus is within its scope
+- 'loops' focus back to the first (or last) focusable element in scope
+- recaptures focus to its scope when focus moves to an out-of-scope element
+
+`FocusScope` solves for this common pattern via the [trap] prop:
+
+<Playground>
+  <FocusScopeExample>
+    <FocusScope trap>
+      <div tabIndex={0}>You can tab to this</div>
+      <div tabIndex={-1}>You can't tab to this cuz it has tab-index -1</div>
+      <div tabIndex={0}>YOU CANNOT ESCAPE!</div>
+      <Deactivate />
+    </FocusScope>
+  </FocusScopeExample>
+</Playground>
+
+> NOTE: Focus traps don't work
+> when using `FocusScope` [as a headless component].
+
+Focus traps created using `FocusScope` are nestable.
+See [Nesting Focus Scopes] for more.
+
+## Focusing Automatically
+
+Occasionally UI patterns benefit from automatically focusing the first
+focusable element when they appear. For example, a UI that reveals a
+search input when the 'search' button is activated could automatically
+move focus from the button to the input on reveal.
+
+For use cases like this, `FocusScope` has an [autoFocus] feature:
+
+<Playground>
+  <FocusScopeExample>
+    <FocusScope autoFocus>
+      <div tabIndex={0}>this should be automatically focused</div>
+      <Deactivate />
+    </FocusScope>
+  </FocusScopeExample>
+</Playground>
+
+> NOTE: `autoFocus` is generally considered detrimental to accessibility.
+> Be sure that it is not likely to cause confusion for someone using a
+> keyboard or screen reader before implementing!
+
+## Restoring Focus
+
+Some UI patterns include focusable elements that are temporarily reavealed,
+(and that may even automatically receive focus on reveal via [autoFocus])
+with the expectation that when the temporary elements are hidden, focus will
+return to the previously focused element. For example, a [Combo box] may
+reveal a list of options when activated, allowing the user to focus on items
+in the list, and then restoring focus to the Combo box when a selection
+is made or canceled.
+
+For scenarios such as this, `FocusScope` includes a [restoreFocus] feature:
+
+<Playground>
+  <FocusScopeExample>
+    <FocusScope restoreFocus>
+      <div tabIndex={0}>You can tab to this</div>
+      <Deactivate />
+    </FocusScope>
+  </FocusScopeExample>
+</Playground>
+
+## Managing Focus with Events
+
+Sometimes focus needs to be manipulated in response to keyboard events.
+For example, a [Carousel] may move focus to next and previous items
+in the carousel in response to arrow key presses.
+
+For scenarios such as these, `FocusScope` supports handling keyboard
+events via [onkeyPress]:
+
+<Playground>
+  <FocusScopeExample>
+    <FocusScope
+      autoFocus
+      onKeyPress={(event, focusManager) => {
+        if (event.key === 'ArrowDown') {
+          focusManager.focusNext();
+          event.preventDefault();
+        } else if (event.key === 'ArrowUp') {
+          focusManager.focusPrevious();
+          event.preventDefault();
+        }
+      }}
+    >
+      <div tabIndex={-1}>You can't tab to these</div>
+      <div tabIndex={-1}>Use arrow keys</div>
+      <div tabIndex={-1}>instead</div>
+      <Deactivate />
+    </FocusScope>
+
+  </FocusScopeExample>
+</Playground>
+
+## Nesting Focus Scopes
+
+While `FocusScope` is designed to manage arbitrarily deeply nested focusable
+elements within its scope, it is also designed to coordinate with
+other `FocusScope` components that are nested. For example, a Modal that
+traps focus, might include a Combo box that _also_ traps focus when it is
+active.
+
+`FocusScope` supports nested `FocusScopes` by delegating management of
+focus to the nested scopes when appropriate:
+
+<Playground>
+  <FocusScopeExample>
+    <FocusScope trap>
+      <div tabIndex={0}>This is a trap</div>
+      <FocusScopeExample>
+        <FocusScope trap>
+          <div tabIndex={0}>This is a trap too</div>
+          <Deactivate />
+        </FocusScope>
+      </FocusScopeExample>
+      <Deactivate />
+    </FocusScope>
+  </FocusScopeExample>
+</Playground>
+
+[component]: https://reactjs.org/docs/components-and-props.html
+[headless component]: https://medium.com/merrickchristensen/headless-user-interface-components-565b0c0f2e18
+[render prop]: https://reactjs.org/docs/render-props.html
+[reactdom]: https://reactjs.org/docs/react-dom.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[ref-forwarding component]: https://reactjs.org/docs/forwarding-refs.html
+[styled component]: https://styled-components.com/
+[authoring practices]: https://www.w3.org/TR/wai-aria-practices/
+[modal]: https://www.w3.org/TR/wai-aria-practices/#dialog_modal
+[combo box]: https://www.w3.org/TR/wai-aria-practices/#combobox
+[focus options]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLOrForeignElement/focus
+[focusmanager]: #FocusManager
+[as a container]: #as-a-container
+[as a headless component]: #as-a-headless-component
+[id]: #id
+[as]: #as
+[trap]: #trap
+[autofocus]: #autoFocus
+[restorefocus]: #restoreFocus
+[onfocus]: #onFocus
+[onblur]: #onBlur
+[onkeypress]: #onKeyPress
+[trapping focus]: #trapping-focus
+[focusing automatically]: #focusing-automatically
+[restoring focus]: #restoring-focus
+[managing focus with events]: #managing-focus-with-events
+[nesting focus scopes]: #nesting-focus-scopes
+[findmanagerbyid]: #findmanagerbyid
+[focus]: #focus

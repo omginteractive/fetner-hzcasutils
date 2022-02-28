@@ -1,0 +1,33 @@
+{
+  "name": "test-publish",
+  "description": "Smoke test @hzdg packages before publish",
+  "version": "1.1.2",
+  "bin": "bin/test-publish.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/test-publish"
+  },
+  "dependencies": {
+    "@rauschma/stringio": "^1.4.0",
+    "@types/mkdirp": "^0.5.2",
+    "@types/rimraf": "^2.0.2",
+    "@types/stoppable": "^1.1.0",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "stoppable": "^1.1.0",
+    "verdaccio": "^3.11.6",
+    "yurnalist": "^1.0.5"
+  },
+  "files": [
+    "bin",
+    "test-packages",
+    "!*/__test*"
+  ]
+}

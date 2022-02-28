@@ -1,0 +1,233 @@
+---
+name: useScrollDirection
+menu: Hooks
+route: /use-scroll-direction
+---
+
+import {Playground, Props} from 'docz';
+import {useScrollDirection, ScrollDirection} from './src';
+import {animated, config, useSpring} from 'react-spring';
+import useSize from '@hzdg/use-size';
+import useRefCallback from '@hzdg/use-ref-callback';
+
+# useScrollDirection
+
+A React [hook] for components that care about
+the nearest scrollable container's scroll direction.
+
+## Installation
+
+```shell
+yarn add @hzdg/scroll-monitor
+```
+
+## Usage
+
+```js
+import {useScrollDirection} from '@hzdg/scroll-monitor';
+```
+
+`useScrollDirection` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrollDirection` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useScrollDirection(): [
+  ScrollDirection,
+  (node: HTMLElement | null) => void
+];
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useScrollDirection(
+  providedRef: React.RefObject<HTMLElement>,
+): ScrollDirection;
+```
+
+Note that `useScrollDirection` will _not_ return a [callback ref] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
+
+## State
+
+If a `providedRef` is passed to `useScrollDirection`,
+returns a `ScrollDirection` value.
+
+If no `providedRef` is passed, returns an array containing a
+`ScrollDirection` object and a callback `ref`. The `ref` should be passed
+to an underlying DOM node. Note that the node does not have to be scrollable
+itself, as `useScrollDirection` will traverse the DOM to find a scrollable
+parent to observe.
+
+### ScrollDirection
+
+```ts
+interface ScrollDirection {
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled vertically,
+   * where 'direction' is either 'up' or 'down'.
+   */
+  vertical: 'down' | 'up' | null;
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled horizontally,
+   * where 'direction' is either 'left' or 'right'.
+   */
+  horizontal: 'left' | 'right' | null;
+}
+```
+
+## Examples
+
+### Basic
+
+<Playground>
+  {() => {
+    const ScrollDirectionUser = () => {
+      const [{vertical}, ref] = useScrollDirection();
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+            color: `${vertical == ScrollDirection.DOWN ? 'white' : 'yellow'}`,
+            background: `${vertical == ScrollDirection.DOWN ? 'green' : 'red'}`,
+          }}
+        >
+          {vertical == ScrollDirection.DOWN ? 'down' : 'up'}
+        </div>
+      );
+    };
+    return <ScrollDirectionUser />;
+  }}
+</Playground>
+
+### [Scroll Up Bar] using [react-spring]
+
+<Playground>
+  {() => {
+    const ScrollUpBar = () => {
+      const [ref, setRef] = useRefCallback(null);
+      const {vertical} = useScrollDirection(ref);
+      const {height} = useSize(ref);
+      const transform = useSpring({
+        config: config.stiff,
+        transform: `translateY(${
+          vertical === ScrollDirection.UP ? 0 : -height
+        }px)`,
+      });
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+            color: 'lightgray',
+            overflow: 'hidden',
+          }}
+        >
+          <animated.div
+            ref={setRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              left: 0,
+              background: 'green',
+              padding: '0 20px',
+              color: 'white',
+              ...transform,
+            }}
+          >
+            Scroll down to hide me!
+          </animated.div>
+          <span>Scroll up to show the bar!</span>
+        </div>
+      );
+    };
+    return <ScrollUpBar />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useScrollDirection` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrollDirection`
+accepts an optional `providedRef` [ref object]:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useScrollDirection`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollDirection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  const scrollDirection = useScrollDirection(forwardedRef);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(scrollDirection, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useScrollDirection`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollDirection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  const scrollDirection = useScrollDirection(ref);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(scrollDirection, null, 2)}</div>;
+};
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[scroll up bar]: http://usabilitypost.com/2014/05/24/the-scroll-up-bar/
+[react-spring]: https://www.react-spring.io/
+[userefcallback]: /use-ref-callback
+[installation]: #installation
+[usage]: #usage
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

@@ -1,0 +1,358 @@
+---
+name: PageGesture
+menu: Deprecated
+route: /page-gesture
+---
+
+import {Playground, Props} from 'docz';
+import PageGesture from './src';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] with [swipe] detection for binding to gestures
+
+# PageGesture
+
+A React [component] that can detect gestures from mouse, touch,
+or keyboard inputs, and interpret them as 'next', 'previous', 'first',
+or 'last' pagination events. This is useful for custom pagination UI
+like carousels.
+
+`PageGesture` is a [headless component], meaning
+it accepts a child [render prop], and returns the result
+of calling that render prop with the latest state of
+an ongoing gesture, or the last state of a completed gesture
+and it's associated pagination action.
+
+> **Deprecated**
+>
+> It is generally better to use the [usePageGesture] hook,
+> along side the [hooks] that provide the specific types of gesture input
+> you would like to detect, rather than use this component.
+> For more, see [usePageGesture] and:
+>
+> | use hook             | for PageGesture prop |
+> | -------------------- | -------------------- |
+> | [useKeyboardGesture] | keyboard             |
+> | [useMouseGesture]    | mouse                |
+> | [useTouchGesture]    | touch                |
+> | [useWheelGesture]    | wheel                |
+> | [useGesture]         | \*                   |
+
+## Installation
+
+```shell
+yarn add @hzdg/page-gesture
+```
+
+## Usage
+
+```
+import PageGesture from '@hzdg/page-gesture';
+```
+
+## Examples
+
+A basic horizontal example that shows off all possible gesture inputs
+(try using mouse, wheel/touchpad, touch, keyboard):
+
+<Playground>
+  <PageGesture preventDefault>
+    {state => (
+      <pre
+        tabIndex={1}
+        ref={state.gestureRef}
+        style={{width: '100%', minHeight: 400}}
+      >
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
+      </pre>
+    )}
+  </PageGesture>
+</Playground>
+
+An vertical example that uses gesture inputs with custom configurations:
+
+> **Note:** Try `Space`, `PageUp`, `PageDown`, `Home`, `End`, arrow keys!
+
+<Playground>
+  <PageGesture orientation="vertical" keyboard={{preventDefault: true}}>
+    {state => (
+      <pre
+        tabIndex={1}
+        ref={state.gestureRef}
+        style={{width: '100%', minHeight: 400}}
+      >
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
+      </pre>
+    )}
+  </PageGesture>
+</Playground>
+
+## Props
+
+### children
+
+```ts
+children: (state: PageGestureRenderProps) => JSX.Element;
+```
+
+A function that takes [page gesture state] and returns a React element.
+Also known as a 'render prop'.
+
+### innerRef
+
+```ts
+innerRef?: React.Ref<HTMLElement> | null;
+```
+
+An optional [ref object] or [callback ref].
+Useful when the owner component needs to handle ref forwarding.
+
+### disabled
+
+```ts
+disabled?: boolean | null;
+```
+
+Whether or not page gesture detection is enabled.
+
+### passive
+
+```ts
+passive?: boolean | null;
+```
+
+Whether or not to listen to gesture events passively.
+If `true`, then `preventDefault` will have no effect.
+
+### preventDefault
+
+```ts
+preventDefault?: boolean | null;
+```
+
+Whether or not to prevent the default action
+for events during a gesture.
+
+### keyboard
+
+```ts
+keyboard?: KeyboardGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect keyboard gestures,
+or configuration for detecting keyboard gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### mouse
+
+```ts
+mouse?: MouseGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect mouse gestures,
+or configuration for detecting mouse gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### touch
+
+```ts
+touch?: TouchGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect touch gestures,
+or configuration for detecting touch gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### wheel
+
+```ts
+wheel?: WheelGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect wheel gestures,
+or configuration for detecting wheel gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### onStart
+
+```ts
+onStart?: ((state: GestureState) => void) | null;
+```
+
+A callback for when gesturing starts.
+Receives the initializing gesture state.
+
+### onMove
+
+```ts
+onMove?: ((state: GestureState) => void) | null;
+```
+
+A callback for when an ongoing gesture updates.
+Receives the latest gesture state.
+
+### onEnd
+
+```ts
+onEnd?: ((state: GestureEndState) => void) | null;
+```
+
+A callback for when a gesture has completed.
+Receives the ending gesture state.
+
+### orientation
+
+```ts
+orientation?: typeof VERTICAL | typeof HORIZONTAL | null;
+```
+
+The axis along which pagination gestures should be detected.
+Either `vertical` or `horizontal`.
+
+Defaults to `horizontal` (x-axis).
+
+### threshold
+
+```ts
+threshold?: number | null;
+```
+
+How far a gesture must have cumulatively moved in a direction along the
+axis of orientation in order to be assigned a pagination intent.
+This value is an absolute distance.
+
+Defaults to `50`.
+
+### onNext
+
+```ts
+onNext?: () => void;
+```
+
+A callback for when a NEXT pagination action occurs.
+
+### onPrevious
+
+```ts
+onPrevious?: () => void;
+```
+
+A callback for when a PREVIOUS pagination action occurs.
+
+### onFirst
+
+```ts
+onFirst?: () => void;
+```
+
+A callback for when a FIRST pagination action occurs.
+
+### onLast
+
+```ts
+onLast?: () => void;
+```
+
+A callback for when a LAST pagination action occurs.
+
+## Render Props
+
+A page gesture state object passed to the PageGesture
+render prop (children function).
+
+In usage as follows:
+
+```js
+<PageGesture {...props}>
+  {(state) => (...)}
+</PageGesture>
+```
+
+### gestureRef
+
+```ts
+gestureRef: (node: HTMLElement | null) => void;
+```
+
+A [ref object] that should be passed to an underlying DOM node.
+
+### action
+
+```ts
+action?: 'next' | 'previous' | 'first' | 'last' | 'canceled' | 'unknown';
+```
+
+The pagination action that has been determined to for the latest gesture state.
+Will be `undefined` if a gesture is ongoing, or `'unknown'` if a gesture
+has finished, but a pagination action has not been determined yet.
+
+### Gesture State
+
+The latest gesture state will also be part of the render props.
+
+For more on gesture state, see:
+
+- [KeyboardGestureState]
+- [KeyboardGestureEndState]
+- [MouseGestureState]
+- [MouseGestureEndState]
+- [TouchGestureState]
+- [TouchGestureEndState]
+- [WheelGestureState]
+- [WheelGestureEndState]
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `PageGesture` accepts an optional `innerRef` prop:
+
+```js
+const RefForwardingGestureCatcher = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `PageGesture`. Note that the returned `gestureRef` render prop
+  // will _not_ be the same as `forwardedRef`, but they _will_ get
+  // the same value.
+  return (
+    <PageGesture {...props} innerRef={forwardedRef}>
+      {/*
+        Note that we actually pass `gestureRef` to the underlying component,
+        not `forwardedRef`. We do this to make sure that
+        `PageGesture` is notified when the ref value changes.
+        This works because we passed `forwardedRef` to `PageGesture`,
+        which will update the `forwardedRef` automatically.
+      */}
+      {({gestureRef, ...state}) => <div ref={gestureRef}>{/* ... */}</div>}
+    </PageGesture>
+  );
+});
+```
+
+[component]: https://reactjs.org/docs/components-and-props.html
+[hooks]: https://reactjs.org/docs/hooks-intro.html
+[headless component]: https://medium.com/merrickchristensen/headless-user-interface-components-565b0c0f2e18
+[render prop]: https://cdb.reacttraining.com/use-a-render-prop-50de598f11ce
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usepagegesture]: /use-page-gesture
+[usekeyboardgesture]: /use-keyboard-gesture
+[usemousegesture]: /use-mouse-gesture
+[usetouchgesture]: /use-touch-gesture
+[usewheelgesture]: /use-wheel-gesture
+[usegesture]: /use-gesture
+[page gesture state]: #render-props
+[keyboardgesturestate]: /use-keyboard-gesture#keyboardgesturestate
+[mousegesturestate]: /use-mouse-gesture#mousegesturestate
+[touchgesturestate]: /use-touch-gesture#touchgesturestate
+[wheelgesturestate]: /use-wheel-gesture#wheelgesturestate
+[keyboardgestureendstate]: /use-keyboard-gesture#keyboardgestureendstate
+[mousegestureendstate]: /use-mouse-gesture#mousegestureendstate
+[touchgestureendstate]: /use-touch-gesture#touchgestureendstate
+[wheelgestureendstate]: /use-wheel-gesture#wheelgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/
+[swipe]: https://use-gesture.netlify.app/docs/state#swipe-drag-only
+[@hzdg/usekeypress]: /use-key-press

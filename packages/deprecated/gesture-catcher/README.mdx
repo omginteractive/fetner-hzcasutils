@@ -1,0 +1,290 @@
+---
+name: GestureCatcher
+menu: Deprecated
+route: /gesture-catcher
+---
+
+import {Playground, Props} from 'docz';
+import GestureCatcher from './src';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] for binding to gestures
+
+# GestureCatcher
+
+A React [component] that can detect gestures from mouse, touch, or keyboard inputs.
+This is useful for custom UI like carousels, screen navigations,
+or custom scrolling.
+
+> **Note**: If your use case is related to scrolling,
+> but doesn't need to control scroll position,
+> then [ScrollMonitor] provides a simpler approach.
+
+`GestureCatcher` is a [headless component], meaning
+it accepts a child [render prop], and returns the result
+of calling that render prop with the latest state of
+an ongoing or completed gesture.
+
+> **Deprecated**
+>
+> It is generally better to use the [hooks]
+> that provide the specific types of gesture input you would like to
+> detect, rather than use this component. To read more about them, see:
+>
+> | use hook             | for GestureCatcher prop |
+> | -------------------- | ----------------------- |
+> | [useKeyboardGesture] | keyboard                |
+> | [useMouseGesture]    | mouse                   |
+> | [useTouchGesture]    | touch                   |
+> | [useWheelGesture]    | wheel                   |
+> | [useGesture]         | \*                      |
+
+## Installation
+
+```shell
+yarn add @hzdg/gesture-catcher
+```
+
+## Usage
+
+```
+import GestureCatcher from '@hzdg/gesture-catcher';
+```
+
+## Examples
+
+A basic example that shows off all possible gesture inputs
+(try using mouse, wheel/touchpad, touch, keyboard):
+
+<Playground>
+  <GestureCatcher preventDefault>
+    {state => (
+      <pre
+        tabIndex={1}
+        ref={state.gestureRef}
+        style={{width: '100%', minHeight: 400}}
+      >
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
+      </pre>
+    )}
+  </GestureCatcher>
+</Playground>
+
+An example that uses gesture inputs with custom configurations:
+
+<Playground>
+  <GestureCatcher wheel={{threshold: 100}} keyboard={{preventDefault: true}}>
+    {state => (
+      <pre
+        tabIndex={1}
+        ref={state.gestureRef}
+        style={{width: '100%', minHeight: 400}}
+      >
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
+      </pre>
+    )}
+  </GestureCatcher>
+</Playground>
+
+## Props
+
+### children
+
+```ts
+children: (state: GestureCatcherRenderProps) => JSX.Element;
+```
+
+A function that takes [gesture state] and returns a React element.
+Also known as a 'render prop'.
+
+### innerRef
+
+```ts
+innerRef?: React.Ref<HTMLElement> | null;
+```
+
+An optional ref object or callback ref.
+Useful when the owner component needs to handle ref forwarding.
+
+### disabled
+
+```ts
+disabled?: boolean | null;
+```
+
+Whether or not gesture detection is enabled.
+
+### passive
+
+```ts
+passive?: boolean | null;
+```
+
+Whether or not to listen to gesture events passively.
+If `true`, then `preventDefault` will have no effect.
+
+### preventDefault
+
+```ts
+preventDefault?: boolean | null;
+```
+
+Whether or not to prevent the default action
+for events during a gesture.
+
+### keyboard
+
+```ts
+keyboard?: KeyboardGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect keyboard gestures,
+or configuration for detecting keyboard gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### mouse
+
+```ts
+mouse?: MouseGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect mouse gestures,
+or configuration for detecting mouse gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### touch
+
+```ts
+touch?: TouchGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect touch gestures,
+or configuration for detecting touch gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### wheel
+
+```ts
+wheel?: WheelGestureConfig | boolean | null;
+```
+
+Either a boolean determining whether or not to detect wheel gestures,
+or configuration for detecting wheel gestures. This configuration
+inherits `passive` and `preventDefault` props.
+
+### onStart
+
+```ts
+onStart?: ((state: GestureState) => void) | null;
+```
+
+A callback for when gesturing starts.
+Receives the initializing gesture state.
+
+### onMove
+
+```ts
+onMove?: ((state: GestureState) => void) | null;
+```
+
+A callback for when an ongoing gesture updates.
+Receives the latest gesture state.
+
+### onEnd
+
+```ts
+onEnd?: ((state: GestureEndState) => void) | null;
+```
+
+A callback for when a gesture has completed.
+Receives the ending gesture state.
+
+## Render Props
+
+A gesture state object passed to the GestureCatcher
+render prop (children function).
+
+In usage as follows:
+
+```js
+<GestureCatcher {...props}>
+  {(state) => (...)}
+</GestureCatcher>
+```
+
+### gestureRef
+
+```ts
+gestureRef: (node: HTMLElement | null) => void;
+```
+
+A callback ref that should be passed to an underlying DOM node.
+
+### Gesture State
+
+The latest gesture state will also be part of the render props.
+
+For more on gesture state, see:
+
+- [KeyboardGestureState]
+- [KeyboardGestureEndState]
+- [MouseGestureState]
+- [MouseGestureEndState]
+- [TouchGestureState]
+- [TouchGestureEndState]
+- [WheelGestureState]
+- [WheelGestureEndState]
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `GestureCatcher` accepts an optional `innerRef` prop:
+
+```js
+const RefForwardingGestureCatcher = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `GestureCatcher`. Note that the returned `gestureRef` render prop
+  // will _not_ be the same as `forwardedRef`, but they _will_ get
+  // the same value.
+  return (
+    <GestureCatcher {...props} innerRef={forwardedRef}>
+      {/*
+        Note that we actually pass `gestureRef` to the underlying component,
+        not `forwardedRef`. We do this to make sure that
+        `GestureCatcher` is notified when the ref value changes.
+        This works because we passed `forwardedRef` to `GestureCatcher`,
+        which will update the `forwardedRef` automatically.
+      */}
+      {({gestureRef, ...state}) => <div ref={gestureRef}>{/* ... */}</div>}
+    </GestureCatcher>
+  );
+});
+```
+
+[component]: https://reactjs.org/docs/components-and-props.html
+[hooks]: https://reactjs.org/docs/hooks-intro.html
+[headless component]: https://medium.com/merrickchristensen/headless-user-interface-components-565b0c0f2e18
+[render prop]: https://cdb.reacttraining.com/use-a-render-prop-50de598f11ce
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usekeyboardgesture]: /use-keyboard-gesture
+[usemousegesture]: /use-mouse-gesture
+[usetouchgesture]: /use-touch-gesture
+[usewheelgesture]: /use-wheel-gesture
+[usegesture]: /use-gesture
+[gesture state]: #render-props
+[scrollmonitor]: /scroll-monitor
+[keyboardgesturestate]: /use-keyboard-gesture#keyboardgesturestate
+[mousegesturestate]: /use-mouse-gesture#mousegesturestate
+[touchgesturestate]: /use-touch-gesture#touchgesturestate
+[wheelgesturestate]: /use-wheel-gesture#wheelgesturestate
+[keyboardgestureendstate]: /use-keyboard-gesture#keyboardgestureendstate
+[mousegestureendstate]: /use-mouse-gesture#mousegestureendstate
+[touchgestureendstate]: /use-touch-gesture#touchgestureendstate
+[wheelgestureendstate]: /use-wheel-gesture#wheelgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/
+[@hzdg/usekeypress]: /use-key-press

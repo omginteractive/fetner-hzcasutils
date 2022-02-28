@@ -1,0 +1,301 @@
+---
+name: useWheelGesture
+menu: Deprecated
+route: /use-wheel-gesture
+---
+
+import {Playground, Props} from 'docz';
+import {useWheelGesture} from '@hzdg/gesture-catcher';
+import useRefCallback from '@hzdg/use-ref-callback';
+import WheelGestureVisualizer from './src/examples/WheelGestureVisualizer';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [react-use-gesture] for binding to gestures
+
+# useWheelGesture
+
+A React [hook] for components that want to handle wheel gesture intent.
+
+<WheelGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use wheel or trackpad to gesture!</p>
+  <p style={{color: 'lightgray'}}>Click to reset</p>
+</WheelGestureVisualizer>
+
+## Installation
+
+```shell
+yarn add @hzdg/gesture-catcher
+```
+
+## Usage
+
+```
+import {useWheelGesture} from '@hzdg/gesture-catcher';
+```
+
+`useWheelGesture` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useWheelGesture` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useWheelGesture(
+  handler: WheelGestureChangeHandler | WheelGestureHandlers,
+  config?: WheelGestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useWheelGesture(
+  providedRef: React.RefObject<HTMLElement>,
+  handler: WheelGestureChangeHandler | WheelGestureHandlers,
+  config?: WheelGestureConfig | null,
+): void;
+```
+
+Note that `useWheelGesture` will _not_ return a [callback ref] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+## Config
+
+`config?: WheelGestureConfig | null,`
+
+An object describing configuration for observing wheel gestures.
+This is optionally provided to [useWheelGesture].
+
+```ts
+interface WheelGestureConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `wheel` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to wheel events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * How 'far' a series of wheel events must cumulatively move
+   * in a consistent direction before a wheel gesture is detected,
+   * or `false`, if _any_ wheel event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of wheel events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then wheel events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
+}
+```
+
+## Handler
+
+`handler: WheelGestureChangeHandler | WheelGestureHandlers,`
+
+A function to handle wheel gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [WheelGestureChangeHandler], [WheelGestureHandlers],
+[WheelGestureState], and [WheelGestureEndState] for more.
+
+### WheelGestureChangeHandler
+
+A function that handles changes to an ongoing or finished wheel gesture.
+Receives [WheelGestureState] or [WheelGestureEndState] objects.
+
+```ts
+type WheelGestureChangeHandler = (
+  state: WheelGestureState | WheelGestureEndState,
+) => void;
+```
+
+### WheelGestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [WheelGestureState] objects,
+while `onEnd` will receive [WheelGestureEndState] objects.
+
+```ts
+interface WheelGestureHandlers {
+  onStart?: (state: WheelGestureState) => void;
+  onMove?: (state: WheelGestureState) => void;
+  onEnd?: (state: WheelGestureEndState) => void;
+}
+```
+
+## State
+
+`state: WheelGestureState | WheelGestureEndState`
+
+An object describing the state of an ongoing or finished wheel gesture.
+This is provided to the [handler] or handlers.
+
+### WheelGestureState
+
+An object describing the latest state of an ongoing wheel gesture.
+
+It is passed to the [WheelGestureChangeHandler]
+or `onStart` and `onMove` [WheelGestureHandlers] provided to [useWheelGesture].
+
+```ts
+interface WheelGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the spin speed in the x dimension. */
+  xSpin: number;
+  /** The cumulative change of the spin speed in the y dimension. */
+  ySpin: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'wheel';
+}
+```
+
+### WheelGestureEndState
+
+An object describing the last state of a previous wheel gesture.
+
+It is passed to the [WheelGestureChangeHandler]
+or `onEnd` [WheelGestureHandlers] provided to [useWheelGesture].
+
+```ts
+interface WheelGestureEndState extends WheelGestureState {
+  /** Indicates a gesture is complete */
+  gesturing: false;
+  /** The type of event associated with the end of the gesture. */
+  type: 'gestureend';
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const WheelGestureUser = () => {
+      const [gesture, setGesture] = React.useState(
+        'spin that wheel (or trackpad)!',
+      );
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useWheelGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <WheelGestureUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useWheelGesture` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useWheelGesture` accepts an optional [ref object].
+
+It could be used with ref forwarding like:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  const [gesture, setGesture] = React.useState(null);
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useWheelGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useWheelGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  useWheelGesture(forwardedRef, setGesture);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const [gesture, setGesture] = React.useState(null);
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useWheelGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useWheelGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  useWheelGesture(ref, setGesture);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+};
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
+[installation]: #installation
+[usage]: #usage
+[config]: #config
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding
+[usewheelgesture]: #usage
+[wheelgesturechangehandler]: #wheelgesturechangehandler
+[wheelgesturehandlers]: #wheelgesturehandlers
+[wheelgestureconfig]: #wheelgestureconfig
+[wheelgesturestate]: #wheelgesturestate
+[wheelgestureendstate]: #wheelgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/

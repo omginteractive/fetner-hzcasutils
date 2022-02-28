@@ -1,0 +1,206 @@
+---
+name: useScrollIntersection
+menu: Hooks
+route: /use-scroll-intersection
+---
+
+import {Playground, Props} from 'docz';
+import useScrollIntersection from './src/useScrollIntersection';
+import useRefCallback from '@hzdg/use-ref-callback';
+
+# useScrollIntersection
+
+A React [hook] for components that care about
+the intersection of the nearest scrollable container's scroll position
+with one or more areas of the scrollable area.
+
+> **Note:**
+> If your use case is for knowing when an element intersects with the viewport
+> or a scrollable area, or any other use case that could be covered
+> by [IntersectionObserver], you should try [useIntersection] instead.
+
+## Installation
+
+```shell
+yarn add @hzdg/scroll-monitor
+```
+
+## Usage
+
+```js
+import {useScrollIntersection} from '@hzdg/scroll-monitor';
+```
+
+`useScrollIntersection` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrollIntersection` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useScrollIntersection(
+  config: ScrollIntersectionConfig,
+): [Intersects, (node: HTMLElement | null) => void];
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useScrollIntersection(
+  providedRef: React.RefObject<HTMLElement>,
+  config: ScrollIntersectionConfig,
+): Intersects;
+```
+
+Note that `useScrollIntersection` will _not_ return a [callback ref] in
+this case. The provided [ref object] is expected to be passed to an
+underlying DOM node.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
+
+## Config
+
+`config: BoundsRect | BoundsRect[]`
+
+One or more areas to check for intersection with
+the nearest scrollable container's scroll position.
+
+A `BoundsRect` area can be defined completely, i.e.,
+
+`{top: 0, right: 50, bottom: 50, left: 0}`
+
+or partially, i.e.,
+
+`{right: 50, bottom: 50}`
+
+## State
+
+If a `providedRef` is passed to `useScrollIntersection`,
+returns the `Intersects` value, consisting of one intersection
+boolean or an array of booleans.
+
+If no `providedRef` is passed, returns an array containing an `Intersects` value
+and a callback `ref`. The `ref` should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `useScrollIntersection` will traverse the DOM to find
+a scrollable parent to observe.
+
+`Intersects` describes whether or not any of the configured areas
+currently intersect with the nearest scrollable container's scroll position.
+
+If a single area has been configured, `Intersects` will be a boolean.
+If an array of areas has been configured, this will be an array of booleans,
+where the index of each boolean corresponds to the index of the area in
+the configuration array.
+
+### Intersects
+
+```ts
+type Intersects = boolean | boolean[];
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const IntersectionIndicator = ({intersects}) => (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          height: 250,
+          fontSize: '2em',
+          color: `${intersects ? 'white' : 'yellow'}`,
+          background: `${intersects ? 'green' : 'red'}`,
+        }}
+      >
+        {intersects ? 'intersecting' : 'not intersecting'}
+      </div>
+    );
+    const ScrollIntersectionUser = () => {
+      const [intersects, ref] = useScrollIntersection([
+        {bottom: 250},
+        {top: 250},
+        {top: 500},
+      ]);
+      return (
+        <div ref={ref} style={{overflow: 'scroll', width: '100%', height: 250}}>
+          <IntersectionIndicator intersects={intersects[0]} />
+          <IntersectionIndicator intersects={intersects[1]} />
+          <IntersectionIndicator intersects={intersects[2]} />
+        </div>
+      );
+    };
+    return <ScrollIntersectionUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useScrollIntersection` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrollIntersection`
+accepts an optional `providedRef` [ref object]:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useScrollIntersection`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollIntersection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  const intersects = useScrollIntersection(forwardedRef, {top: 250});
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useScrollIntersection`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollIntersection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  const intersects = useScrollIntersection(ref, {top: 250});
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
+};
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[intersectionobserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+[userefcallback]: /use-ref-callback
+[useintersection]: /use-intersection
+[installation]: #installation
+[usage]: #usage
+[config]: #config
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

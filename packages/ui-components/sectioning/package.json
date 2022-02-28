@@ -1,0 +1,33 @@
+{
+  "name": "@hzdg/sectioning",
+  "description": "React components for semantic sectioning of HTML content",
+  "version": "1.1.0",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/ui-components/sectioning"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/examples",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3"
+  }
+}

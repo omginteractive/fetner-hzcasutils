@@ -1,0 +1,28 @@
+{
+  "name": "@hzdg/moving-average",
+  "description": "A simple utility for keeping an average of the latest fixed number of values over time",
+  "version": "1.1.4",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/moving-average"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.4"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@hzdg/dom-utils",
+  "description:": "Helpers for interacting with the DOM.",
+  "version": "2.0.3",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/dom-utils"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "invariant": "^2.2.4"
+  }
+}

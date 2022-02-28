@@ -1,0 +1,431 @@
+---
+name: DraftailRenderer
+menu: UI Components
+route: /draftail-renderer
+---
+
+import {Playground} from 'docz';
+import DraftailRenderer from './src/';
+
+# DraftailRenderer
+
+A React [component] to render the data coming from the [Draftail](wagtail's default rich text editor).
+There is currently a default set of tags that will be used to render the blocks that come from draftail's api,
+but we have an option to overwrite them and use custom components by passing them to `components` prop.
+Reference the example below on how to do it.
+
+Note: there are more block types in draftail than we are currently handling, those will be added as new features.
+To add new block types, specify it's name in `blockTypes.ts` and add a case handler in the main `index.tsx`.
+
+## Installation
+
+```shell
+yarn add @hzdg/draftail-renderer
+```
+
+## Usage
+
+```js
+import DraftailRenderer from '@hzdg/draftail-renderer';
+```
+
+#### Example with inlined links
+
+<Playground>
+  {() => {
+    return (
+      <DraftailRenderer
+        body={{
+          blocks: [
+            {
+              key: 'b0ei9',
+              text:
+                'Some text that has inline links inside of it. A link  can also be a bold link  or an italic link . It can pretty much be anything you want. Even a bold and italic together.',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [
+                {
+                  offset: 68,
+                  length: 10,
+                  style: 'BOLD',
+                },
+                {
+                  offset: 147,
+                  length: 25,
+                  style: 'BOLD',
+                },
+                {
+                  offset: 85,
+                  length: 11,
+                  style: 'ITALIC',
+                },
+                {
+                  offset: 147,
+                  length: 25,
+                  style: 'ITALIC',
+                },
+              ],
+              entityRanges: [
+                {
+                  offset: 48,
+                  length: 4,
+                  key: 0,
+                },
+                {
+                  offset: 68,
+                  length: 9,
+                  key: 1,
+                },
+                {
+                  offset: 85,
+                  length: 11,
+                  key: 2,
+                },
+                {
+                  offset: 147,
+                  length: 24,
+                  key: 3,
+                },
+              ],
+              data: {},
+            },
+          ],
+          entityMap: {
+            '0': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.facebook.com',
+              },
+            },
+            '1': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.linkedin.com',
+              },
+            },
+            '2': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.instagram.com',
+              },
+            },
+            '3': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.twitter.com',
+              },
+            },
+          },
+        }}
+      />
+    );
+  }}
+</Playground>
+
+#### Example with nested ordered and unordered lists.
+
+<Playground>
+  {() => {
+    const Heading = ({children}) => <h1 style={{color: 'red'}}>{children}</h1>;
+    const CustomParagraph = ({children}) => (
+      <p style={{color: 'blue'}}>{children}</p>
+    );
+    return (
+      <DraftailRenderer
+        headline={`test`}
+        body={{
+          blocks: [
+            {
+              key: 'b4b1l',
+              text: 'Unstyled',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '5fe05',
+              text: 'Bold',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [
+                {
+                  offset: 0,
+                  length: 4,
+                  style: 'BOLD',
+                },
+              ],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '8s9c9',
+              text: 'Italic',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [
+                {
+                  offset: 0,
+                  length: 6,
+                  style: 'ITALIC',
+                },
+              ],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '9cnvm',
+              text: 'link example',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [
+                {
+                  offset: 0,
+                  length: 12,
+                  key: 0,
+                },
+              ],
+              data: {},
+            },
+            {
+              key: 'b4b1l',
+              text: 'Ordered List ',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '91cqt',
+              text: 'Item',
+              type: 'ordered-list-item',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '26dpl',
+              text: 'Nested Item',
+              type: 'ordered-list-item',
+              depth: 1,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '5eu5k',
+              text: 'Deeply nested item',
+              type: 'ordered-list-item',
+              depth: 2,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '64pji',
+              text: 'Deeper than deeply nested item',
+              type: 'ordered-list-item',
+              depth: 3,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '7gtc0',
+              text: 'ludicriously deeply nested item',
+              type: 'ordered-list-item',
+              depth: 4,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'jkbi',
+              text: 'Are you serious? ',
+              type: 'ordered-list-item',
+              depth: 5,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '3t5ck',
+              text: 'ludicriously deeply nested item',
+              type: 'ordered-list-item',
+              depth: 4,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '6pm7m',
+              text: 'Deeper than deeply nested item',
+              type: 'ordered-list-item',
+              depth: 3,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '88ptf',
+              text: 'Deeply nested item',
+              type: 'ordered-list-item',
+              depth: 2,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'dfug5',
+              text: 'Nested Item',
+              type: 'ordered-list-item',
+              depth: 1,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '48l8f',
+              text: 'Item',
+              type: 'ordered-list-item',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'fijna',
+              text: 'Unordered List ',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '9jr9h',
+              text: 'Item',
+              type: 'unordered-list-item',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '1e4gn',
+              text: 'Nested Item',
+              type: 'unordered-list-item',
+              depth: 1,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'qp0u',
+              text: 'Deeply nested item',
+              type: 'unordered-list-item',
+              depth: 2,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '5h6p4',
+              text: 'Deeper than deeply nested item',
+              type: 'unordered-list-item',
+              depth: 3,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '39sak',
+              text: 'ludicriously deeply nested item',
+              type: 'unordered-list-item',
+              depth: 4,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'cg3qn',
+              text: 'Are you serious? ',
+              type: 'unordered-list-item',
+              depth: 5,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '4brnj',
+              text: 'ludicriously deeply nested item',
+              type: 'unordered-list-item',
+              depth: 4,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '7k8il',
+              text: 'Deeper than deeply nested item',
+              type: 'unordered-list-item',
+              depth: 3,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: 'bqkaj',
+              text: 'Deeply nested item',
+              type: 'unordered-list-item',
+              depth: 2,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '6g42d',
+              text: 'Nested Item',
+              type: 'unordered-list-item',
+              depth: 1,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+            {
+              key: '7i6m7',
+              text: 'Item',
+              type: 'unordered-list-item',
+              depth: 0,
+              inlineStyleRanges: [],
+              entityRanges: [],
+              data: {},
+            },
+          ],
+          entityMap: {
+            '0': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.google.com',
+              },
+            },
+          },
+        }}
+        components={{h1: Heading}}
+      />
+    );
+  }}
+</Playground>
+
+[component]: https://reactjs.org/docs/components-and-props.html
+[hooks]: https://reactjs.org/docs/hooks-intro.html
+[draftail]: https://github.com/springload/draftail

@@ -1,0 +1,34 @@
+{
+  "name": "@hzdg/draftail-renderer",
+  "description": "A React component to render the data coming from the Draftail rich text editor",
+  "version": "1.4.6",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/ui-components/draftail-renderer"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "types",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3",
+    "draft-js": "^0.11.3",
+    "immutable": "^3.7.4"
+  }
+}

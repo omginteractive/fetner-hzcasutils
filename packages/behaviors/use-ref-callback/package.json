@@ -1,0 +1,30 @@
+{
+  "name": "@hzdg/use-ref-callback",
+  "description": "A React hook for components that need to know when a ref changes.",
+  "version": "2.0.4",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/use-ref-callback"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4"
+  }
+}

@@ -1,0 +1,587 @@
+---
+name: GestureObservable
+menu: Utilities
+route: /gesture-observable
+---
+
+# GestureObservable
+
+An [Observable] for gestures.
+
+Uses the [zen-observable] implementation of Observable.
+
+## Installation
+
+```shell
+yarn add @hzdg/gesture-observable
+```
+
+## Usage
+
+```js
+import GestureObservable from '@hzdg/gesture-observable';
+```
+
+Create an observable by passing the element
+you wish to observe and gesture configuration to `GestureObservable.create`:
+
+```js
+const element = document.getElementById('some-element-that-receives-gestures');
+const observable = GestureObservable.create(element, {
+  keyboard: boolean;
+  mouse: boolean;
+  touch: boolean;
+  wheel: boolean;
+});
+```
+
+Then subscribe to it to receive an updated gesture state
+whenever a gesture is detected:
+
+```js
+const subscription = observable.subscribe(gestureState => {
+  // do something with the gesture state!
+});
+```
+
+Then, whenever you are done watching the element, simply unsubscribe:
+
+```js
+//...sometime later
+subscription.unsubscribe();
+```
+
+## Configuration
+
+By default, `GestureObservable` is configured to use all supported sources.
+That is to say, the default configuration looks like:
+
+```js
+{
+  touch: true,
+  mouse: true,
+  wheel: true,
+  keyboard: true,
+  passive: false,
+  preventDefault: false,
+}
+```
+
+> **NOTE:** A `GestureObservable` configuration shape is
+> the merger of the configuration of enabled inputs,
+> **plus** the shapes of the configurations for the enabled inputs.
+>
+> For more, see:
+>
+> - [Configuration for Touch](#configuration-for-a-touchgestureobservable)
+> - [Configuration for Mouse](#configuration-for-a-mousegestureobservable)
+> - [Configuration for Wheel](#configuration-for-a-wheelgestureobservable)
+> - [Configuration for Keyboard](#configuration-for-a-keyboardgestureobservable)
+
+If you want to use all supported sources, but customize the configuration
+for how they listen to events, you can specify just those parts of the config:
+
+```js
+// Use all the default inputs, but listen to them passively.
+// Also treat _any_ wheel input as part of a gesture.
+const observable = GestureObservable.create(someElement, {
+  passive: true,
+  threshold: false,
+});
+```
+
+If you only want to use some of the supported sources, you have two options:
+
+### Configuring `GestureObservable` to use just the sources you want
+
+```js
+// Use just mouse and touch support.
+const observable = GestureObservable.create(someElement, {
+  mouse: true,
+  touch: true,
+});
+```
+
+> **NOTE:** If you specify _any_ sources as `true`,
+> then all unspecified sources will become `false`!
+
+### Using one of the bundled single-source Observables
+
+```js
+import {
+  MouseGestureObservable,
+  TouchGestureObservable,
+} from '@hzdg/gesture-observable';
+// Use just mouse and touch support, but as separate observables.
+// You might use some rx-style combinators to merge these,
+// or subscribe to them individually.
+const mouseObservable = MouseGestureObservable.create(someElement);
+const touchObservable = TouchGestureObservable.create(someElement);
+```
+
+For more on using single-source Observables, see:
+
+- [MouseGestureObservable](#mousegestureobservable)
+- [TouchGestureObservable](#touchgestureobservable)
+- [WheelGestureObservable](#wheelgestureobservable)
+- [KeyboardGestureObservable](#keyboardgestureobservable)
+
+## Handling Gesture State
+
+When you subscribe, your subscriber will receive a series of objects over time
+that represent the latest state of a previous or ongoing gesture. The exact
+shape of this object will vary depending on your configuration.
+
+For example, if you have a configuration like:
+
+```js
+// Use just keyboard and touch.
+const observable = GestureObservable.create(someElement, {
+  touch: true,
+  keyboard: true,
+});
+```
+
+Your subscriber will receive gesture state objects that reflect
+either a snapshot of a touch gesture or a keyboard gesture,
+depending on which input has most recently been indicated.
+
+For more on gesture state, see the specifics for each source:
+
+- [Mouse Gesture State](#mouse-gesture-state)
+- [Touch Gesture State](#touch-gesture-state)
+- [Wheel Gesture State](#wheel-gesture-state)
+- [Keyboard Gesture State](#keyboard-gesture-state)
+
+## TouchGestureObservable
+
+An Observable of touch gestures.
+
+### Creating a TouchGestureObservable
+
+```ts
+import {TouchGestureObservable} from '@hzdg/gesture-observable';
+
+const observable: Observable<
+  TouchGestureState | TouchGestureEndState
+> = TouchGestureObservable.create(
+  /** The DOM element to observe for touch events. */
+  element: Element,
+  /** Configuration for the TouchGestureObservable. */
+  config?: Partial<TouchGestureObservableConfig> | null,
+);
+```
+
+### Configuration for a TouchGestureObservable
+
+```ts
+interface TouchGestureObservableConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `touchmove` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to touch events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * How 'far' a series of touch events must cumulatively move
+   * in a consistent direction before a touch gesture is detected,
+   * or `false`, if _any_ touch event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of touch events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then touch events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: 'horizontal' | 'vertical';
+}
+```
+
+### Touch Gesture State
+
+A snapshot of an in-progress touch gesture.
+
+```ts
+interface TouchGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
+  /** The type of event last associated with a gesture. */
+  type: 'touchstart' | 'touchmove';
+}
+```
+
+### Touch Gesture End State
+
+The last snapshot of a completed touch gesture.
+
+```ts
+interface TouchGestureEndState extends TouchGestureState {
+  /** Indicates a gesture is no longer ongoing. \*/
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. \*/
+  type: 'touchend';
+}
+```
+
+## MouseGestureObservable
+
+An Observable of mouse gestures.
+
+### Creating a MouseGestureObservable
+
+```ts
+import {MouseGestureObservable} from '@hzdg/gesture-observable';
+
+const observable: Observable<
+  MouseGestureState | MouseGestureEndState
+> = MouseGestureObservable.create(
+  /** The DOM element to observe for mouse events. */
+  element: Element,
+  /** Configuration for the MouseGestureObservable. */
+  config?: Partial<MouseGestureObservableConfig> | null,
+);
+```
+
+### Configuration for a MouseGestureObservable
+
+```ts
+interface MouseGestureObservableConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `mousemove` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to mouse events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * How 'far' a series of mouse events must cumulatively move
+   * in a consistent direction before a mouse gesture is detected,
+   * or `false`, if _any_ mouse event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of mouse events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then mouse events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: 'horizontal' | 'vertical';
+}
+```
+
+### Mouse Gesture State
+
+A snapshot of an in-progress mouse gesture.
+
+```ts
+interface MouseGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
+  /** The type of event associated with the gesture. */
+  type: 'mousedown' | 'mousemove';
+}
+```
+
+### Mouse Gesture End State
+
+The last snapshot of a completed mouse gesture.
+
+```ts
+interface MouseGestureEndState extends MouseGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'mouseup';
+}
+```
+
+## WheelGestureObservable
+
+An Observable of a wheel gestures.
+
+Uses normalized versions of wheel event values because they
+can vary significantly on different platforms and browsers.
+For example, some devices (like trackpads) emit more events
+at smaller increments with fine granularity, and some emit
+massive jumps with linear speed or acceleration.
+
+Also uses a `gestureend` event to indicate when the intent
+to end a wheel gesture has been detected. This is useful
+because there is no native representation of a 'wheelend' event
+(like you get from touch with 'touchend' or mouse with 'mouseup'),
+which makes it difficult to decide when to resolve a guess
+for a gesturing user's intention.
+
+### Creating a WheelGestureObservable
+
+```ts
+import {WheelGestureObservable} from '@hzdg/gesture-observable';
+
+const observable: Observable<
+  WheelGestureState | WheelGestureEndState
+> = WheelGestureObservable.create(
+  /** The DOM element to observe for wheel events. */
+  element: Element,
+  /** Configuration for the WheelGestureObservable. */
+  config?: Partial<WheelGestureObservableConfig> | null,
+)
+```
+
+### Configuration for a WheelGestureObservable
+
+```ts
+interface WheelGestureObservableConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `wheel` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to wheel events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * How 'far' a series of wheel events must cumulatively move
+   * in a consistent direction before a wheel gesture is detected,
+   * or `false`, if _any_ wheel event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of wheel events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then wheel events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: 'horizontal' | 'vertical';
+}
+```
+
+### Wheel Gesture State
+
+A snapshot of an in-progress wheel gesture.
+
+```ts
+interface WheelGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the spin speed in the x dimension. */
+  xSpin: number;
+  /** The cumulative change of the spin speed in the y dimension. */
+  ySpin: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
+  /** The type of event associated with the gesture. */
+  type: 'wheel';
+}
+```
+
+### Wheel Gesture End State
+
+The last snapshot of a completed wheel gesture.
+
+```ts
+interface WheelGestureEndState extends WheelGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'gestureend';
+}
+```
+
+## KeyboardGestureObservable
+
+An Observable of keyboard gestures.
+
+### Creating a KeyboardGestureObservable
+
+```ts
+import {KeyboardGestureObservable} from '@hzdg/gesture-observable';
+
+const observable: Observable<
+  KeyboardGestureState | KeyboardGestureEndState
+> = KeyboardGestureObservable.create(
+  /** The DOM element to observe for keyboard events. */
+  element: Element,
+  /** Configuration for the KeyboardGestureObservable. */
+  config?: Partial<KeyboardGestureObservableConfig> | null,
+);
+```
+
+### Configuration for a KeyboardGestureObservable
+
+```ts
+interface KeyboardGestureObservableConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `keydown` or `keyup` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to keyboard events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+}
+```
+
+### Keyboard Gesture State
+
+A snapshot of an in-progress keyboard gesture.
+
+```ts
+interface KeyboardGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Whether or not the key that triggered the gesture is repeating. */
+  repeat: boolean;
+  /** The key that triggered the gesture. */
+  key:
+    | 'Space'
+    | 'PageUp'
+    | 'PageDown'
+    | 'End'
+    | 'Home'
+    | 'ArrowLeft'
+    | 'ArrowUp'
+    | 'ArrowRight'
+    | 'ArrowDown'
+    | null;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
+  /** The type of event associated with the gesture. */
+  type: 'keydown';
+}
+```
+
+### Keyboard Gesture End State
+
+The last snapshot of a completed keyboard gesture.
+
+```ts
+interface KeyboardGestureEndState extends KeyboardGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'keyup';
+}
+```
+
+[zen-observable]: https://github.com/zenparsing/zen-observable
+[observable]: https://github.com/tc39/proposal-observable

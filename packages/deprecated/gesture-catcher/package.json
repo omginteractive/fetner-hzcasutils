@@ -1,0 +1,37 @@
+{
+  "name": "@hzdg/gesture-catcher",
+  "description": "DEPRECATED: A React component and set of hooks that can detect gestures from mouse, touch, or keyboard inputs",
+  "version": "4.2.0",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/gesture-catcher"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/examples",
+    "!*/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/gesture-observable": "^2.1.2",
+    "@hzdg/use-ref-callback": "^2.0.0",
+    "@hzdg/moving-average": "^1.1.0",
+    "prop-types": "15.x.x"
+  }
+}

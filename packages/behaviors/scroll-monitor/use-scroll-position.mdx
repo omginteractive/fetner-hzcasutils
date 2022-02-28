@@ -1,0 +1,177 @@
+---
+name: useScrollPosition
+menu: Hooks
+route: /use-scroll-position
+---
+
+import {Playground, Props} from 'docz';
+import useScrollPosition from './src/useScrollPosition';
+import useRefCallback from '@hzdg/use-ref-callback';
+
+# useScrollPosition
+
+A React [hook] for components that care about
+the nearest scrollable container's scroll position.
+
+## Installation
+
+```shell
+yarn add @hzdg/scroll-monitor
+```
+
+## Usage
+
+```js
+import {useScrollPosition} from '@hzdg/scroll-monitor';
+```
+
+`useScrollPosition` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrollPosition` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useScrollPosition(
+  handler: (position: ScrollPosition) => void,
+): (node: HTMLElement | null) => void;
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useScrollPosition(
+  providedRef: React.RefObject<HTMLElement>,
+  handler: (position: ScrollPosition) => void,
+): void;
+```
+
+Note that `useScrollPosition` will _not_ return a [callback ref] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
+
+## Handler
+
+`handler: (position: ScrollPosition) => void,`
+
+A function to handle scroll position updates.
+Receives the latest [ScrollPosition].
+
+## State
+
+`state: ScrollPosition`
+
+An object describing the scroll position for the nearest scrollable container.
+This is provided to the [handler].
+
+### ScrollPosition
+
+```ts
+interface ScrollPosition {
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled vertically,
+   */
+  top: number | null;
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled horizontally,
+   */
+  left: number | null;
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const ScrollPositionUser = () => {
+      const [position, setPosition] = React.useState(null);
+      const ref = useScrollPosition(setPosition);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(position, null, 2)}
+        </div>
+      );
+    };
+    return <ScrollPositionUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useScrollPosition` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrollPosition`
+accepts an optional `providedRef` [ref object]:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  const [position, setPosition] = React.useState(null);
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useScrollPosition`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollPosition` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  useScrollPosition(forwardedRef, setPosition);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(position, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const [position, setPosition] = React.useState(null);
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useScrollPosition`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrollPosition` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  useScrollPosition(ref, setPosition);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(position, null, 2)}</div>;
+};
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
+[installation]: #installation
+[usage]: #usage
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

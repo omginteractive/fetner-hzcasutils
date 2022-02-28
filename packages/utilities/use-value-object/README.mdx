@@ -1,0 +1,148 @@
+---
+name: useValueObject
+menu: Hooks
+route: /use-value-object
+---
+
+# useValueObject
+
+A React [hook] for components that want to [memoize] values
+that are [shallowly equal].
+
+### Uh, ok. but...
+
+## What's it For?
+
+Let's say you have a component that takes some config, like:
+
+```tsx
+interface MyComponentProps {
+  config: {
+    foo: string;
+    bar: number;
+  };
+}
+
+function MyComponent({config}: MyComponentProps): JSX.Element {
+  useEffect(() => {
+    // Some effect that depends on changes to config.
+    // Note that this effect will run every time `config` changes.
+  }, [config]);
+}
+```
+
+It might be used like this:
+
+```tsx
+interface OtherComponentProps {
+  foo: string;
+}
+
+function OtherComponent({foo}: OtherComponentProps): JSX.Element {
+  return (<MyComponent config={{foo, bar: 0}}) />);
+}
+```
+
+Because `OtherComponent` creates a new config object every time it renders,
+the effect in `MyComponent` will run every time, even if the values
+_on_ the config haven't changed!
+
+This hook lets you easily address this kind of thing.
+For example, consider this version of `MyComponent`:
+
+```tsx
+function MyComponent({config}: MyComponentProps): JSX.Element {
+  const parsedConfig = useValueObject(config);
+  useEffect(() => {
+    // Some effect that depends on changes to config.
+    // Note that this version's effect will only run
+    // when `parsedConfig` changes.
+  }, [parsedConfig]);
+}
+```
+
+Now, the effect in `MyComponent` will only run when `useValueObject` returns
+a new config object, which will only be whenever `config` is not shallowly
+equal to the previous `config`!
+
+> **Note:** `useValueObject` expects objects that are composed of
+> simple string keys and primitive values (i.e., no object or array values).
+
+## Installation
+
+```shell
+yarn add @hzdg/use-value-object
+```
+
+## Usage
+
+```js
+import useValueObject from '@hzdg/use-value-object';
+```
+
+`useValueObject` accepts any value, but returns the _first_ value it received
+while consecutive values are shallowly equal to it:
+
+```ts
+function ValueObjectUser({someObjectProp}) {
+  // `vo` will only change when `someObjectProp`
+  // is not shallowly equal to the last `someObjectProp`.
+  const vo = useValueObject(someObjectProp);
+  // ...
+}
+```
+
+## Transforming Objects
+
+Sometimes you want to transform one value into another, but memoize
+the transformed result. `useValueObject` allows an optional transform
+argument to do this:
+
+```js
+function SomeComponent() {
+  // `vo` will always be the same object here because the transform will
+  // only be run when the value it is not shallowly equal to the last value.
+  const vo = useValueObject({foo: 'foo'}, v => ({...v, bar: 'bar'}));
+}
+```
+
+Sometimes the value might change, but the _transformed_ value remains
+the same. `useValueObject` works in this scenario, too:
+
+```js
+function SomeComponent() {
+  // `vo` will always be the same object here because the transform will
+  // always return a value shallowly equal to the previous transformed
+  // value, even though the input value is _not_ shallowly equal.
+  const vo = useValueObject({foo: Date.now()}, v => ({bar: 'bar'}));
+}
+```
+
+## Nested Objects
+
+`useValueObject` performs a [shallow comparison], so it will _not_ consider
+objects with nested objects to be equivalent:
+
+```js
+function SomeComponent() {
+  // `vo` will be different on every render!
+  const vo = useValueObject({a: {b: 'hi'}});
+}
+```
+
+One way to work around this limitation might be
+to split the object into multiple value objects:
+
+```js
+function SomeComponent() {
+  // `voB` will be the same on every render.
+  const voB = useValueObject({b: 'hi'});
+  // `vo` will now also be the same on every render!
+  const vo = useValueObject({a: voB});
+}
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[memoize]: https://en.wikipedia.org/wiki/Memoization
+[shallowly equal]: https://stackoverflow.com/a/51343585/356955
+[shallow comparison]: https://stackoverflow.com/a/51343585/356955

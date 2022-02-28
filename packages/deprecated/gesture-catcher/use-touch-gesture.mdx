@@ -1,0 +1,298 @@
+---
+name: useTouchGesture
+menu: Deprecated
+route: /use-touch-gesture
+---
+
+import {Playground, Props} from 'docz';
+import useTouchGesture from './src/useTouchGesture';
+import useRefCallback from '@hzdg/use-ref-callback';
+import TouchGestureVisualizer from './src/examples/TouchGestureVisualizer';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [react-use-gesture] for binding to gestures
+
+# useTouchGesture
+
+A React [hook] for components that want to handle touch gesture intent.
+
+<TouchGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use touch drag to gesture!</p>
+  <p style={{color: 'lightgray'}}>Press to reset</p>
+</TouchGestureVisualizer>
+
+## Installation
+
+```shell
+yarn add @hzdg/gesture-catcher
+```
+
+## Usage
+
+```js
+import {useTouchGesture} from '@hzdg/gesture-catcher';
+```
+
+`useTouchGesture` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useTouchGesture` has 2 different signatures:
+
+Without an existing [ref object]:
+
+```ts
+function useTouchGesture(
+  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  config?: TouchGestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+The returned [callback ref] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
+
+```ts
+function useTouchGesture(
+  providedRef: React.RefObject<HTMLElement>,
+  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  config?: TouchGestureConfig | null,
+): void;
+```
+
+Note that `useTouchGesture` will _not_ return a [callback ref] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+## Config
+
+`config?: TouchGestureConfig | null`
+
+An object describing configuration for observing touch gestures.
+This is optionally provided to [useTouchGesture].
+
+```ts
+interface TouchGestureConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `touchmove` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to touch events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * How 'far' a series of touch events must cumulatively move
+   * in a consistent direction before a touch gesture is detected,
+   * or `false`, if _any_ touch event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of touch events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then touch events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
+}
+```
+
+## Handler
+
+`handler: TouchGestureChangeHandler | TouchGestureHandlers,`
+
+A function to handle touch gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [TouchGestureChangeHandler], [TouchGestureHandlers],
+[TouchGestureState], and [TouchGestureEndState] for more.
+
+### TouchGestureChangeHandler
+
+A function that handles changes to an ongoing or finished touch gesture.
+Receives [TouchGestureState] or [TouchGestureEndState] objects.
+
+```ts
+type TouchGestureChangeHandler = (
+  state: TouchGestureState | TouchGestureEndState,
+) => void;
+```
+
+### TouchGestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [TouchGestureState] objects,
+while `onEnd` will receive [TouchGestureEndState] objects.
+
+```ts
+interface TouchGestureHandlers {
+  onStart?: (state: TouchGestureState) => void;
+  onMove?: (state: TouchGestureState) => void;
+  onEnd?: (state: TouchGestureEndState) => void;
+}
+```
+
+## State
+
+`state: TouchGestureState | TouchGestureEndState`
+
+An object describing the state of an ongoing or finished touch gesture.
+This is provided to the [handler] or handlers.
+
+### TouchGestureState
+
+An object describing the latest state of an ongoing touch gesture.
+
+It is passed to the [TouchGestureChangeHandler]
+or `onStart` and `onMove` [TouchGestureHandlers] provided to [useTouchGesture].
+
+```ts
+interface TouchGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'touchstart' | 'touchmove';
+}
+```
+
+### TouchGestureEndState
+
+An object describing the last state of a previous touch gesture.
+
+It is passed to the [TouchGestureChangeHandler]
+or `onEnd` [TouchGestureHandlers] provided to [useTouchGesture].
+
+```ts
+interface TouchGestureEndState extends TouchGestureState {
+  /** Indicates a gesture is complete */
+  gesturing: false;
+  /** The type of event associated with the end of the gesture. */
+  type: 'touchend';
+}
+```
+
+## Example
+
+> Use a touch-enabled device or [touch emulation] to see the below example!
+
+<Playground>
+  {() => {
+    const TouchGestureUser = () => {
+      const [gesture, setGesture] = React.useState('touchy draggy!');
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useTouchGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <TouchGestureUser />;
+  }}
+</Playground>
+
+## Shared Ref / Ref Forwarding
+
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useTouchGesture` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useTouchGesture` accepts an optional [ref object].
+
+It could be used with ref forwarding like:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  const [gesture, setGesture] = React.useState(null);
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // via the `ref` option to `useTouchGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useTouchGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
+  useTouchGesture(forwardedRef, setGesture);
+  const [, setRef] = useRefCallback(null, forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const [gesture, setGesture] = React.useState(null);
+  // Create our own ref to use.
+  const ref = React.useRef(null);
+  // We pass our own ref via the `ref` option to `useTouchGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useTouchGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
+  useTouchGesture(ref, setGesture);
+  const [, setRef] = useRefCallback(null, ref);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
+};
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
+[installation]: #installation
+[usage]: #usage
+[config]: #config
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding
+[touch emulation]: https://developers.google.com/web/tools/chrome-devtools/device-mode/
+[usetouchgesture]: #usage
+[touchgesturechangehandler]: #touchgesturechangehandler
+[touchgesturehandlers]: #touchgesturehandlers
+[touchgestureconfig]: #touchgestureconfig
+[touchgesturestate]: #touchgesturestate
+[touchgestureendstate]: #touchgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/

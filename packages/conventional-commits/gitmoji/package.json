@@ -1,0 +1,23 @@
+{
+  "name": "@hzdg/gitmoji",
+  "version": "1.0.5",
+  "description": "Emoji data for git commits",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "config": {
+    "tests": {
+      "dependencies": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/gitmoji"
+  },
+  "main": "gitmoji.json",
+  "types": "gitmoji.d.ts",
+  "author": "Eric Eldredge <lettertwo@gmail.com>"
+}

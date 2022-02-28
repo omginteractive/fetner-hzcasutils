@@ -1,0 +1,169 @@
+---
+name: useWindowSize
+menu: Hooks
+route: /use-window-size
+---
+
+import {Playground} from 'docz';
+import WindowsizeMonitor, {useWindowSize} from './src/index.tsx';
+
+# useWindowSize
+
+A React [hook] for components that care about the [window] size.
+
+## Installation
+
+```shell
+yarn add @hzdg/windowsize-monitor
+```
+
+## Usage
+
+```js
+import {useWindowSize} from '@hzdg/windowsize-monitor';
+```
+
+`useWindowSize` has two different modes of usage: **stateful** and
+**stateless**. (See [stateful] and [stateless] for more on why and when
+to use which).
+
+This means `useWindowSize` has 2 different signatures:
+
+```ts
+// Stateful
+function useWindowSize(config?: WindowSizeConfig): WindowSize;
+
+// Stateless with a handler
+function useWindowSize(
+  handler: (size: WindowSize) => void,
+  config?: WindowSizeConfig,
+): void;
+```
+
+## Stateful
+
+Sometimes a component wants to simply update whenever the window size changes.
+In these cases, `useWindowSize` provides a **stateful** API.
+
+To `useWindowSize` statefully, call `useWindowSize` without any arguments
+or with an optional [config] object.
+It will return a window [state] object:
+
+```ts
+function useWindowSize(config?: WindowSizeConfig): WindowSize;
+```
+
+### Stateful Example
+
+<Playground>
+  {() => {
+    const Size = () => {
+      const {width, height} = useWindowSize();
+      return (
+        <pre style={{width: '100%', height: '100%'}}>
+          current width is {JSON.stringify(width, null, 2)}
+          <br />
+          current height is {JSON.stringify(height, null, 2)}
+        </pre>
+      );
+    };
+    return <Size />;
+  }}
+</Playground>
+
+## Stateless
+
+Sometimes (often for performance reasons), a component wants to derive state
+from window size changes, or debounce or otherwise throttle updates caused
+by changes. In these cases, `useWindowSize` provides a **stateless** API.
+
+To `useWindowSize` statelessly, call `useWindowSize` with a [handler]
+function and an optional [config] object. It will return `undefined`:
+
+```ts
+function useWindowSize(
+  handler: (size: WindowSize) => void,
+  config?: WindowSizeConfig,
+): void;
+```
+
+### Stateless Example
+
+<Playground>
+  {() => {
+    const Size = () => {
+      const [state, setState] = React.useState({});
+      useWindowSize(setState);
+      return (
+        <pre style={{width: '100%', height: '100%'}}>
+          current width is {JSON.stringify(state.width, null, 2)}
+          <br />
+          current height is {JSON.stringify(state.height, null, 2)}
+        </pre>
+      );
+    };
+    return <Size />;
+  }}
+</Playground>
+
+## Config
+
+`config?: WindowSizeConfig`
+
+Optional config for monitoring window size.
+
+```ts
+interface WindowSizeOptions {
+  /**
+   * How frequently window size updates are dispatched.
+   * Default is `0`, meaning every update is dispatched.
+   */
+  throttleMs?: number;
+  /**
+   * The initial window width. Used before a measurement has been taken.
+   * Default is `0`.
+   */
+  initialWidth?: number;
+  /**
+   * The initial window height. Used before a measurement has been taken.
+   * Default is `0`.
+   */
+  initialHeight?: number;
+}
+```
+
+## Handler
+
+`handler: (size: WindowSize) => void`
+
+A function to handle window size changes.
+Receives the latest window size [state] object.
+This is passed to `useWindowSize` when a component has
+a [stateless] use case. For simpler [stateful] use cases,
+no handler is neccessary.
+
+## State
+
+When no [handler] has been provided to `useWindowSize`, a window size
+state object is returned. It is an object describing the latest
+width and height of the [window].
+
+If a [handler] is provided to `useWindowSize`, the window size
+state object is passed to the handler whenever the window size changes.
+
+```ts
+interface WindowSize {
+  width: number;
+  height: number;
+}
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[window]: https://developer.mozilla.org/en-US/docs/Web/API/Window
+[installation]: #installation
+[usage]: #usage
+[stateful]: #stateful
+[stateless]: #stateless
+[config]: #config
+[handler]: #handler
+[state]: #state

@@ -1,0 +1,404 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useKeyPress calls a callback on key event 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": "e",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls a callback on key event 2`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": "e",
+  "last": false,
+  "metaKey": false,
+  "repeat": 1,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls a callback on key event 3`] = `
+Object {
+  "active": false,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": false,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": "e",
+  "last": true,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls onKey on key event 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": "e",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls onKey on key event 2`] = `
+Object {
+  "active": false,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": false,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": "e",
+  "last": true,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls onKeyPress on key press event 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": "e",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress calls onKeyRelease on key release event 1`] = `
+Object {
+  "active": false,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": false,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": "e",
+  "last": true,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles chords (multiple keys) 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles chords (multiple keys) 2`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [
+    " ",
+  ],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": "e",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles chords (multiple keys) 3`] = `
+Object {
+  "active": false,
+  "altKey": false,
+  "chord": Array [
+    " ",
+  ],
+  "ctrlKey": false,
+  "down": false,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": "e",
+  "last": true,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles chords (multiple keys) 4`] = `
+Object {
+  "active": false,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": false,
+  "elapsedTime": Any<Number>,
+  "first": false,
+  "key": " ",
+  "last": true,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["alt","ctrl","meta","shift"] 1`] = `
+Object {
+  "active": true,
+  "altKey": true,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": true,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["alt","ctrl","meta"] 1`] = `
+Object {
+  "active": true,
+  "altKey": true,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["alt","ctrl"] 1`] = `
+Object {
+  "active": true,
+  "altKey": true,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["alt"] 1`] = `
+Object {
+  "active": true,
+  "altKey": true,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["ctrl","meta","shift"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": true,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["ctrl","meta"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["ctrl"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": true,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["meta","shift"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": true,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["meta"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": true,
+  "repeat": 0,
+  "shiftKey": false,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;
+
+exports[`useKeyPress handles modifier keys ["shift"] 1`] = `
+Object {
+  "active": true,
+  "altKey": false,
+  "chord": Array [],
+  "ctrlKey": false,
+  "down": true,
+  "elapsedTime": Any<Number>,
+  "first": true,
+  "key": " ",
+  "last": false,
+  "metaKey": false,
+  "repeat": 0,
+  "shiftKey": true,
+  "startTime": Any<Number>,
+  "timeStamp": Any<Number>,
+}
+`;

@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useIntersection uses a handler 1`] = `
+Object {
+  "boundingClientRect": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "intersectionRatio": 1,
+  "intersectionRect": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "isIntersecting": true,
+  "rootBounds": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "target": <div
+    data-testid="intersects"
+  />,
+  "time": Any<Number>,
+}
+`;
+
+exports[`useIntersection uses an existing ref and a handler 1`] = `
+Object {
+  "boundingClientRect": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "intersectionRatio": 1,
+  "intersectionRect": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "isIntersecting": true,
+  "rootBounds": Object {
+    "bottom": 0,
+    "height": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+    "width": 0,
+  },
+  "target": <div
+    data-testid="intersects"
+  />,
+  "time": Any<Number>,
+}
+`;

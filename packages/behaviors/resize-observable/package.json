@@ -1,0 +1,31 @@
+{
+  "name": "@hzdg/resize-observable",
+  "description": "An Observable wrapper for ResizeObserver",
+  "version": "2.0.12",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/resize-observable"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "ts",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/dom-utils": "^2.0.3",
+    "@juggle/resize-observer": "^3.2.0",
+    "@types/zen-observable": "^0.8.0",
+    "zen-observable": "^0.8.14"
+  }
+}

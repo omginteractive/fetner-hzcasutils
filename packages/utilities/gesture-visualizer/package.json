@@ -1,0 +1,47 @@
+{
+  "name": "gesture-visualizer",
+  "description": "A fancypants visualizer for showing off gestures and such",
+  "version": "1.1.14",
+  "main": "index.ts",
+  "license": "UNLISCENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/gesture-visualizer"
+  },
+  "files": [
+    "**/*.{js,jsx,ts,tsx}",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@hzdg/gesture-catcher": "^4.2.0",
+    "@hzdg/moving-average": "^1.1.4",
+    "@hzdg/use-ref-callback": "^2.0.4",
+    "@hzdg/use-size": "^4.0.15",
+    "@types/d3-array": "^2.0.0",
+    "@types/d3-scale": "^2.1.1",
+    "@types/d3-scale-chromatic": "^1.3.1",
+    "@vx/axis": "^0.0.193",
+    "@vx/curve": "^0.0.193",
+    "@vx/event": "^0.0.193",
+    "@vx/grid": "^0.0.193",
+    "@vx/group": "^0.0.193",
+    "@vx/legend": "^0.0.193",
+    "@vx/responsive": "^0.0.193",
+    "@vx/scale": "^0.0.193",
+    "@vx/shape": "^0.0.193",
+    "@vx/tooltip": "^0.0.193",
+    "d3-array": "^2.4.0",
+    "d3-scale": "^2.2.2",
+    "d3-scale-chromatic": "^1.5.0"
+  }
+}

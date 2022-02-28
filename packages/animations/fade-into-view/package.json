@@ -1,0 +1,15 @@
+{
+  "name": "@hzdg/fade-into-view",
+  "version": "0.0.7",
+  "description": "Fades into view its child component",
+  "main": "cjs/index.js",
+  "private": true,
+  "module": "es/index.js",
+  "typings": "ts/index.d.ts",
+  "files": [
+    "cjs",
+    "es",
+    "src"
+  ],
+  "license": "MIT"
+}

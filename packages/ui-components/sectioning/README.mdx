@@ -1,0 +1,253 @@
+---
+name: sectioning
+menu: UI Components
+route: /sectioning
+---
+
+import {Playground} from 'docz';
+import {H} from './src/H';
+import {Section, Article} from './src/sectioning';
+import {Body, Blockquote} from './src/sectioningRoot';
+import {useSectionLevel, useNextSectionLevel} from './src/sectionLevel';
+
+# Sectioning
+
+Sectioning components are React [Components] that wrap [sectioning content].
+Sectioning represents a thematically similar section of content,
+and establishes or participates in an HTML5 [document outline],
+or heading level (h1, h2, etc) hierarchy.
+
+For a good overview of using HTML5 semantics to section content
+(and the many pitfalls), see:
+
+- [How to Section your HTML]
+- [Why You Should Choose HTML5 `article` Over `section`]
+- [A Decade of Heading Backwards]
+
+## Rationale
+
+One common piece of advice amongst devs who've read the [spec] is to
+'just use `<h1>` everywhere'. The spec even says it:
+
+> …authors are strongly encouraged to either use only h1 elements,
+> or to use elements of the appropriate rank for the section's nesting level.
+
+However, in practice, [there is no document outline algorithm]. So,
+it turns out that using "elements of the appropriate rank for
+the section's nesting level" is the _only viable option_.
+
+You may be wondering, given the above, why would you want to use
+a set of components that purports to conform to that spec?
+
+**The short answer**: Rendering a specific heading level (e.g., `<h2>`)
+implicitly _couples_ a component to a page structure, which limits
+composability and reuse, and these components let you break that coupling.
+
+**The longer answer**:
+
+Composition is a core feature of React, and a component that renders
+a heading level element is inherently _less_ composable than one
+that does not, since the browser (or assistive technology) _will not_
+apply document outline semantics to 'fix' your heading levels for you.
+
+An `<h2>` in the wrong place (say, after an `<h3>`) could be confusing
+for assistive technologies and search engines, and explicitly rendering
+`<h2>` or `<h3>` in your components makes it very easy to uknowingly
+create this problem.
+
+Instead, you could use the sectioning [H] component anywhere where you
+might otherwise use an `<h1>` (or `<h2>`, or `<h3>`...). This way, when
+you compose your component with other, more general components
+(using [Sectioning components]), the rendered elements will
+_automatically_ be "the appropriate rank for the section's nesting level"!
+
+In other words, these sectioning components let you write code as if
+the document outline was a thing, even though it's not.
+
+## Installation
+
+```shell
+yarn add @hzdg/sectioning
+```
+
+## Usage
+
+```jsx
+import {Body, Section, Article, Blockquote, H} from '@hzdg/sectioning';
+```
+
+<Playground>
+  <Body>
+    <H>This H renders an h1 in a Body sectioning root context</H>
+    <Section>
+      <H>This H renders an h2 in a Section sectioning content context</H>
+      <Article>
+        <H>
+          This H renders an h3 in a nested Article sectioning content context
+        </H>
+        <Blockquote>
+          <H>
+            This H renders an h1 in a nested Blockquote sectioning root context
+          </H>
+        </Blockquote>
+        <H level={4}>
+          This H renders an h4 override (would be h3) in a nested Article
+          sectioning content context
+        </H>
+      </Article>
+    </Section>
+  </Body>
+</Playground>
+
+## Sectioning Components
+
+The [sectioning content] components increase the [heading level] for their
+descendants by one for each level of nesting, from 2 to 6.
+
+The sectioning content components are:
+
+- `Article`
+- `Aside`
+- `Nav`
+- `Section`
+
+These components can be used in place of their intrinsic counterparts,
+e.g. `<article>`, `<section>`, etc. They will render the corresponding
+element (with all props, attributes, ref, etc.), but also wrap the children
+in a [Section Level Context].
+
+### Sectioning Root Components
+
+In contrast to the components above, [sectioning root] components _reset_
+the heading level to 1 for their descendants, _regardless_ of the heading level
+in which they may be nested.
+
+The sectioning root components are:
+
+- `Body`
+- `Blockquote`
+- `Details`
+- `Dialog`
+- `Fieldset`
+- `Figure`
+- `Td`
+
+> **NOTE:** The document outline [spec] has **never been implemented**
+> by any major web browser or assistive technology. This means that
+> these sectioning root components may confound [heading level] expectations
+> in browsers and screen readers, so use them with caution!
+
+## H
+
+A component that renders a [heading level] element. It is used like intrinsic
+`<h1>`, `<h2>` , etc, but the level is _automatically_ determined by its context.
+
+See [Sectioning Components] for more.
+
+```jsx
+import {H} from '@hzdg/sectioning';
+```
+
+<Playground>
+  <H>This H renders an h1 with no sectioning context</H>
+</Playground>
+
+### With a `level` prop
+
+<Playground>
+  <H level={2}>
+    This H renders an h2 override (would be h1) with no sectioning context
+  </H>
+</Playground>
+
+## Section Level Context
+
+These are not normally used directly (use the [Sectioning Components] and [H]
+instead), and are mostly an implementation detail, but the context provider
+and hook are exported for convenience and completeness.
+
+### SectionLevelProvider
+
+A React [context] provider that establishes a sectioning context for
+descendant sectioning and heading content.
+
+```jsx
+import {SectionLevelProvider} from '@hzdg/sectioning';
+
+function CustomSectioningRootComponent({children, ...props}) {
+  return (
+    <div {...props}>
+      <SectionLevelProvider value={1}>{children}</SectionLevelProvider>
+    </div>
+  );
+}
+```
+
+### useSectionLevel
+
+A React [hook] that returns the current sectioning level, as provided by
+the nearest [SectionLevelProvider].
+
+```jsx
+import {useSectionLevel} from '@hzdg/sectioning';
+```
+
+<Playground>
+  {() => {
+    function SectionLevelUser() {
+      const level = useSectionLevel();
+      return <H>the current section level is {level}</H>;
+    }
+    return <SectionLevelUser />;
+  }}
+</Playground>
+
+### useNextSectionLevel
+
+A React [hook] that returns the current sectioning level, incremented by 1,
+up to the maximum level of 6, as provided by the nearest [SectionLevelProvider].
+
+Note that, as the minimum section level is 1, the default
+return value will be 2 when no sectioning context has been established.
+
+```jsx
+import {useNextSectionLevel} from '@hzdg/sectioning';
+```
+
+<Playground>
+  {() => {
+    function NextSectionLevelUser() {
+      const level = useNextSectionLevel();
+      return (
+        <React.Fragment>
+          <H>This section's level is {level - 1} (one less than the next).</H>
+          <Section>
+            <H>This nested section's level matches {level}</H>
+          </Section>
+        </React.Fragment>
+      );
+    }
+    return <NextSectionLevelUser />;
+  }}
+</Playground>
+
+[components]: https://reactjs.org/docs/components-and-props.html
+[hook]: https://reactjs.org/docs/hooks-intro.html
+[context]: https://reactjs.org/docs/context.html
+[sectioning content]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Sectioning_content
+[sectioning root]: https://html.spec.whatwg.org/multipage/sections.html#sectioning-root
+[heading content]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_categories#Heading_content
+[document outline]: https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Using_HTML_sections_and_outlines
+[heading level]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements
+[how to section your html]: https://css-tricks.com/how-to-section-your-html/
+[why you should choose html5 `article` over `section`]: https://www.smashingmagazine.com/2020/01/html5-article-section/
+[a decade of heading backwards]: https://codepen.io/stevef/post/a-decade-of-heading-backwards
+[there is no document outline algorithm]: https://adrianroselli.com/2016/08/there-is-no-document-outline-algorithm.html
+[spec]: https://html.spec.whatwg.org/multipage/sections.html#headings-and-sections
+[live example]: #nested-in-sectioning-contexts
+[sectioning components]: #sectioning-components
+[section level context]: #section-level-context
+[sectionlevelprovider]: #sectionlevelprovider
+[usesectionlevel]: #usesectionlevel
+[usenextsectionlevel]: #usenextsectionlevel
+[h]: #h

@@ -1,0 +1,32 @@
+{
+  "name": "build-packages",
+  "description": "Build @hzdg packages",
+  "version": "2.0.6",
+  "bin": "bin/build-packages.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/build-packages"
+  },
+  "dependencies": {
+    "@babel/core": "^7.8.6",
+    "@lerna/project": "^3.13.1",
+    "@types/async-retry": "^1.4.1",
+    "@types/mkdirp": "^0.5.2",
+    "@types/rimraf": "^2.0.2",
+    "async-retry": "^1.2.3",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "yurnalist": "^1.0.5"
+  },
+  "files": [
+    "bin",
+    "!*/__test*"
+  ]
+}

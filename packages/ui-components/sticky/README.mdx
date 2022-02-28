@@ -1,0 +1,627 @@
+---
+name: Sticky
+menu: UI Components
+route: /sticky
+---
+
+import {Playground} from 'docz';
+import {
+  Sticky,
+  StickyPortal,
+  Fixed,
+  useStickyState,
+  createStickyLayout,
+} from './src';
+
+# Sticky
+
+## Installation
+
+```shell
+yarn add @hzdg/sticky
+```
+
+## Usage
+
+```js
+import {Sticky, StickyPortal, Fixed, useStickyState, createStickyLayout} from '@hzdg/sticky';
+```
+
+# Sticky Layout
+
+A set of components for managing multiple 'sticky' or 'fixed' elements.
+The [StickyPortal], [Sticky], and [Fixed] components are used together
+such that any `Sticky` or `Fixed` component can transport its contents
+to the corresponding `StickyPortal`.
+
+## Motivation
+
+### The two (or more) sticky (or fixed) body problem
+
+If a layout only has one fixed element, or only has one sticky element, then
+basic css [position] is generally excellent at managing it. If, however, a
+layout has any combination of more than one fixed or sticky elements, then
+positions are often not enough to manage it.
+
+Additionally, [sticky position] is [not fully baked][caniuse] on the web.
+Even if it were, there would still be the problem of managing multiple
+sticky and fixed elements gracefully.
+
+For example:
+
+- If fixed or sticky elements are on screen when another element becomes
+  fixed or sticky, the new element often has to be offset by the size
+  of the existing fixed or sticky elements in order to remain visible.
+- An element that can become sticky, but that is not sticky yet,
+  often needs to account for fixed or sticky elements that are
+  already on screen in order to properly offset the [containing block]
+  to trigger stickiness at the right time.
+- If an element stops being fixed or sticky while other fixed or sticky
+  elements are on screen, the other elements often need to be offset
+  to account for the size of the element that stopped being fixed or sticky.
+- Fixed and sticky elements will often appear at different levels in the
+  [stacking context], when often the expectation is that they be on
+  the same level.
+
+Aspects of the layout such as stacking context, focus, and offsets are
+usually difficult to manage without every sticky or fixed element having
+to know about _every other_ element in the layout that may be _or become_
+sticky or fixed, _and_ whether or not those elements are currently
+sticky or fixed!
+
+With these components, [StickyPortal] provides a [React portal] that renders
+a flex layout, while [Sticky] and [Fixed] allow arbitrarily deeply
+nested components to be rendered through the portal in that layout.
+
+> Note: `Sticky` and `Fixed` components _do not_ have to be in the same
+> branch of the component tree as `StickyPortal`! This is different from how CSS
+> fixed or sticky positioning works, where elements will always be positioned
+> relative to an ancestor.
+
+### **tl,dr:**
+
+Fixed and sticky elements frequently need to be _aware of each other_
+in order to maintain usability in a layout.
+
+These components do that.
+
+## Usage
+
+The trio of components, [StickyPortal], [Sticky], and [Fixed]
+are bound together via a shared [ref]. Basic usage looks like:
+
+```tsx
+function App() {
+  return (
+    <Fragment>
+      <div>
+        <div>some inline content</div>
+        <Fixed>some fixed content</Fixed>
+        <Sticky stuck>some stuck (fixed) content</Sticky>
+        <Sticky>some sticky (becomes fixed) content</Sticky>
+        <Sticky stuck={false}>some unstuck (inline) content</Sticky>
+        <div>some more inline content </div>
+      </div>
+      <StickyPortal>
+        <div>content 'underneath' the portal</div>
+      </StickyPortal>
+    </Fragment>
+  );
+}
+```
+
+In order to allow the possibility of having multiple `StickyPortal` instances,
+the `Sticky` and `Fixed` components optionally accept a `portalRef` prop:
+
+```tsx
+function App() {
+  const portal1 = React.useRef(null);
+  const portal2 = React.useRef(null);
+  return (
+    <Fragment>
+      <div>
+        <div>some inline content</div>
+        <Sticky portalRef={portal1}>some sticky content in portal1</Sticky>
+        <Fixed portalRef={portal2}>some fixed content in portal2</Fixed>
+        <div>some more inline content </div>
+      </div>
+      <StickyPortal ref={portal1} />
+      <StickyPortal ref={portal2} />
+    </Fragment>
+  );
+}
+```
+
+See the examples for [Sticky], [Fixed], [useStickyState],
+or the [Kitchen Sink Example] for more.
+
+## StickyPortal
+
+`StickyPortal` will render a [React portal] with a [fixed position]
+and a flex layout for managing multiple sticky or fixed elements.
+
+It is used with the corresponding [Sticky] and [Fixed] elements
+_anywhere in the component tree_ to emulate [sticky][sticky position]
+and [fixed position] behavior.
+
+## Sticky
+
+`Sticky` is a component that will transport its children into
+the corresponding [StickyPortal] whenever they become 'stuck'.
+
+`Sticky` can be used in either a [controlled] or [uncontrolled] manner.
+
+### Uncontrolled Sticky Example
+
+<Playground>
+  {() => {
+    function Example() {
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 250, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(
+                  #ffffff,
+                  #d0d0d0
+                )`,
+                }}
+              >
+                <div style={{height: 150}} />
+                <Sticky focusable={false}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      background: '#2fdb9f',
+                    }}
+                  >
+                    <h2>hello sticky world</h2>
+                  </div>
+                </Sticky>
+                <div style={{height: 150}} />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                  }}
+                >
+                  <h2>not sticky</h2>
+                </div>
+                <div style={{height: 250}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    }
+    return <Example />;
+  }}
+</Playground>
+
+If an uncontrolled `Sticky` component has a **positioned** ancestor between it
+and the nearest scrolling ancestor, then it will only remain sticky until
+meeting the opposite edge of the positioned ancestor's containing block,
+when it will become positioned absolutely at the edge of the containing block.
+
+> A **positioned** ancestor is one that has any of the following:
+>
+> 1. A position value other than static
+>    (fixed, absolute, relative, or sticky)
+> 2. A transform value other than none
+> 3. A will-change value of transform
+
+### Uncontrolled Sticky Example with Positioned Ancestor
+
+<Playground>
+  {() => {
+    function Example() {
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 250, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(
+                  #ffffff,
+                  #d0d0d0
+                )`,
+                }}
+              >
+                <div style={{height: 150}} />
+                <div
+                  style={{
+                    height: 250,
+                    position: 'relative',
+                    background: `linear-gradient(
+                    #00000000,
+                    #ffcf37)`,
+                  }}
+                >
+                  <Sticky focusable={false}>
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        background: '#ffcf37',
+                      }}
+                    >
+                      <h2>hi</h2>
+                    </div>
+                  </Sticky>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <h2>not sticky</h2>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    height: 250,
+                    position: 'relative',
+                    background: `linear-gradient(
+                    #00000000,
+                    #ffcf37)`,
+                  }}
+                >
+                  <Sticky focusable={false}>
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        background: '#ffcf37',
+                      }}
+                    >
+                      <h2>hi again</h2>
+                    </div>
+                  </Sticky>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <h2>also not sticky</h2>
+                  </div>
+                </div>
+                <div style={{height: 250}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    }
+    return <Example />;
+  }}
+</Playground>
+
+### Controlled Sticky Example
+
+<Playground>
+  {() => {
+    function Example() {
+      const [stuck, setStuck] = React.useState(true);
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 250, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(
+                  #ffffff,
+                  #d0d0d0
+                )`,
+                }}
+              >
+                <div style={{height: 150}} />
+                <Sticky stuck={stuck} willUnstick>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      background: stuck ? '#f42684' : '#1576d4',
+                    }}
+                  >
+                    <h2>{stuck ? 'stuck' : 'unstuck'}</h2>
+                    <button onClick={() => setStuck(v => !v)}>
+                      {stuck ? 'unstick me!' : 'get stuck!'}
+                    </button>
+                  </div>
+                </Sticky>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                  }}
+                >
+                  <h2>not sticky</h2>
+                </div>
+                <div style={{height: 250}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    }
+    return <Example />;
+  }}
+</Playground>
+
+## Fixed
+
+`Fixed` is a component that will **always** transport its children
+into the corresponding [StickyPortal].
+
+### Fixed Example
+
+<Playground>
+  {() => {
+    function Example() {
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 250, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(
+                  #ffffff,
+                  #d0d0d0
+                )`,
+                }}
+              >
+                <Fixed>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      background: '#002d58',
+                    }}
+                  >
+                    <h2 theme={{h2Color: '#2fdb9f'}}>
+                      fixed
+                    </h2>
+                  </div>
+                </Fixed>
+                <div style={{height: 150}} />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                  }}
+                >
+                  <h2>not fixed</h2>
+                </div>
+                <div style={{height: 250}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    }
+    return <Example />;
+  }}
+</Playground>
+
+## useStickyState
+
+`useStickyState` is a [hook] for components that care whether
+the nearest [Sticky] or [Fixed] ancestor is currently stuck.
+
+Returns a `boolean`, defaulting to `false`.
+
+### useStickyState Example
+
+<Playground>
+  {() => {
+    const StickyStateUser = () => {
+      const stuck = useStickyState();
+      return (
+        <h2 theme={{headlineColor: stuck ? '#1576d4' : '#2fdb9f'}}>
+          {stuck ? "i'm stuck :(" : "i'm free! :D"}
+        </h2>
+      );
+    };
+    const Example = () => {
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 250, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(#ffffff,#d0d0d0)`,
+                }}
+              >
+                <div style={{height: 150}} />
+                <Sticky focusable={false}>
+                  <div style={{display: 'flex', alignItems: 'center'}}>
+                    <StickyStateUser />
+                  </div>
+                </Sticky>
+                <div style={{height: 500}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    };
+    return <Example />;
+  }}
+</Playground>
+
+## Kitchen Sink Example
+
+### Fixed, controlled, and uncontrolled Sticky elements in combination:
+
+<Playground>
+  {() => {
+    function StickyPortalUser() {
+      const [stuck, setStuck] = React.useState(true);
+      return (
+        <div
+          style={{
+            /* This transform is applied to the containing div to establish
+             * a new containing block, so that we can fix the position of
+             * the StickyPortal to it rather than the viewport.
+             * See https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+             */
+            transform: `translateY(0)`,
+            border: `1px solid #2f2f2f`,
+          }}
+        >
+          <StickyPortal>
+            <div style={{width: '100%', height: 500, overflow: 'scroll'}}>
+              <div
+                style={{
+                  background: `linear-gradient(#ffffff,#d0d0d0)`,
+                }}
+              >
+                <Fixed>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      background: '#002d58',
+                    }}
+                  >
+                    <h2 theme={{headlineColor: '#2fdb9f'}}>
+                      fixed
+                    </h2>
+                  </div>
+                </Fixed>
+                <div style={{height: 150}} />
+                <Sticky stuck={stuck} willUnstick>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      background: stuck ? '#f42684' :'#1576d4',
+                    }}
+                  >
+                    <h2>{stuck ? 'stuck' : 'unstuck'}</h2>
+                    <button onClick={() => setStuck(v => !v)}>
+                      {stuck ? 'unstick me!' : 'get stuck!'}
+                    </button>
+                  </div>
+                </Sticky>
+                <div style={{height: 150}} />
+                <Sticky focusable={false}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      background: '#2fdb9f',
+                    }}
+                  >
+                    <h2>hello sticky world</h2>
+                  </div>
+                </Sticky>
+                <div style={{height: 150}} />
+                <div
+                  style={{
+                    height: 250,
+                    position: 'relative',
+                    background: `linear-gradient(#00000000,#ffcf37)`,
+                  }}
+                >
+                  <Sticky focusable={false}>
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        background: '#ffcf37',
+                      }}
+                    >
+                      <h2>hi</h2>
+                    </div>
+                  </Sticky>
+                </div>
+                <div style={{height: 500}} />
+              </div>
+            </div>
+          </StickyPortal>
+        </div>
+      );
+    }
+    return <StickyPortalUser />;
+  }}
+</Playground>
+
+[react portal]: https://reactjs.org/docs/portals.html
+[ref]: https://reactjs.org/docs/react-api.html#reactcreateref
+[context]: https://reactjs.org/docs/context.html
+[position]: https://developer.mozilla.org/en-US/docs/Web/CSS/position
+[fixed position]: https://developer.mozilla.org/en-US/docs/Web/CSS/position#fixed
+[sticky position]: https://developer.mozilla.org/en-US/docs/Web/CSS/position#sticky
+[stacking context]: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
+[containing block]: https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#Identifying_the_containing_block
+[caniuse]: https://caniuse.com/#search=sticky
+[hook]: https://reactjs.org/docs/hooks-intro.html
+[controlled]: https://reactjs.org/docs/forms.html#controlled-components
+[uncontrolled]: https://reactjs.org/docs/uncontrolled-components.html
+[motivation]: #motivation
+[usage]: #usage
+[stickyportal]: #StickyPortal
+[sticky]: #sticky
+[fixed]: #fixed
+[usestickystate]: #usestickystate
+[kitchen sink example]: #kitchen-sink-example

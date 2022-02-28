@@ -1,0 +1,175 @@
+---
+name: MovingAverage
+menu: Utilities
+route: /moving-average
+---
+
+# MovingAverage
+
+`MovingAverage` is a simple utility for keeping an average
+of the latest fixed number of values over time. It is a simplistic
+implementation of a statistical [moving average].
+
+## Installation
+
+```shell
+yarn add @hzdg/moving-average
+```
+
+## Usage
+
+```js
+import MovingAverage from '@hzdg/moving-average';
+
+const x = new MovingAverage({size: 6, weight: 1});
+const y = new MovingAverage({size: 6, weight: 1});
+const t = new MovingAverage({size: 12, round: true});
+let lastTimeStamp;
+
+document.addEventListener('mousemove', e => {
+  x.push(e.movementX);
+  y.push(e.movementY);
+  if (lastTimeStamp) t.push(e.timeStamp - lastTimeStamp);
+  lastTimeStamp = e.timeStamp;
+
+  console.log('x movement          ', x.peek());
+  console.log('x movement average  ', x.value);
+  console.log('x movement deviation', x.deviation);
+  console.log('x movement delta    ', x.delta);
+
+  console.log('y movement          ', x.peek());
+  console.log('y movement average  ', x.value);
+  console.log('y movement deviation', x.deviation);
+  console.log('y movement delta    ', x.delta);
+
+  console.log('duration          ', x.peek());
+  console.log('duration average  ', x.value);
+  console.log('duration deviation', x.deviation);
+  console.log('duration delta    ', x.delta);
+});
+```
+
+## Options
+
+```ts
+interface MovingAverageOptions {
+  size?: number;
+  weight?: number;
+  round?: boolean;
+}
+```
+
+### size
+
+Defaults to `10`.
+
+How many previous values to include in the calculation of the average.
+Once the number of values starts to exceed `size`, older values
+are dropped from the calculation. This is what makes the average 'move'.
+
+### weight
+
+Defaults to `1`.
+
+How much weight to give to the latest value.
+This weight regresses linearly over `size` number of values,
+such that the latest value has the most weight, and the oldest
+value the least.
+
+Use a negative value to give the oldest value the most weight instead.
+
+Use a falsy value to give all values equal weight.
+
+### round
+
+Defaults to `false`.
+
+Whether or not the moving average is rounded to the nearest integer.
+
+## Methods
+
+### constructor
+
+```ts
+const movingAverage = new MovingAverage(options?: MovingAverageOptions);
+```
+
+### slice
+
+```ts
+slice(start?: number, end?: number): MovingAverage
+```
+
+Returns a portion of the stored values in this `MovingAverage`
+as a new `MovingAverage`. The new `MovingAverage` will inherit the
+configuration of this `MovingAverage`, with the exception of `size`.
+The size of the new `MovingAverage` will be determined by `end - start`,
+where `end` defaults to the size of the originating `MovingAverage`,
+and `start` defaults to `0`.
+
+### push
+
+```ts
+push(v: number): void
+```
+
+Add a value to the moving average.
+
+### reset
+
+```ts
+reset(): void
+```
+
+Reset the moving average.
+Use this when your value is tied to discrete start and end events,
+like a gesture.
+
+### valueOf
+
+```ts
+valueOf(): number
+```
+
+The moving average of the value since the last reset.
+This average is based on the last `size` number of values,
+and may be optionally weighted and rounded.
+
+## Getters
+
+### deviation
+
+```ts
+get deviation(): number
+```
+
+The absolute deviation of the last value from the moving average.
+
+### delta
+
+```ts
+get delta(): number
+```
+
+The cumulative change (from 0) of the value since the last reset.
+
+### rolling
+
+```ts
+get rolling(): boolean
+```
+
+Whether or not the average is rolling. The average starts rolling
+once the number of items added to the average meets or exceeds the size.
+
+### value
+
+```ts
+get value(): number
+```
+
+The moving average of the value since the last reset.
+This average is based on the last `size` number of values,
+and may be optionally weighted and rounded.
+
+[moving average]: https://en.wikipedia.org/wiki/Moving_average
